@@ -417,10 +417,30 @@
 			box-shadow: 0 22px 44px rgba(21, 34, 56, 0.14);
 		}
 
+		.flyer-trigger {
+			display: block;
+			width: 100%;
+			padding: 0;
+			border: 0;
+			background: transparent;
+			cursor: zoom-in;
+		}
+
 		.flyer-art img {
 			display: block;
 			width: 100%;
 			height: auto;
+		}
+
+		.flyer-zoom {
+			font-size: 0.84rem;
+			font-weight: 800;
+			letter-spacing: 0.04em;
+			text-transform: uppercase;
+			color: #23506f;
+			padding: 12px 16px;
+			border-top: 1px solid #d8e4f3;
+			background: linear-gradient(180deg, #ffffff, #f7fbff);
 		}
 
 		.flyer-copy {
@@ -449,6 +469,57 @@
 			border: 1px solid #dce7f4;
 			font-weight: 700;
 			color: #294766;
+		}
+
+		.lightbox {
+			position: fixed;
+			inset: 0;
+			display: none;
+			align-items: center;
+			justify-content: center;
+			padding: 24px;
+			background: rgba(11, 22, 38, 0.82);
+			backdrop-filter: blur(10px);
+			z-index: 120;
+		}
+
+		.lightbox.open {
+			display: flex;
+		}
+
+		.lightbox-dialog {
+			position: relative;
+			width: min(960px, 92vw);
+			max-height: 90vh;
+			padding: 16px;
+			border-radius: 24px;
+			background: linear-gradient(180deg, #fefefe, #edf6ff);
+			box-shadow: 0 28px 60px rgba(8, 18, 34, 0.3);
+		}
+
+		.lightbox-dialog img {
+			display: block;
+			max-width: 100%;
+			max-height: calc(90vh - 32px);
+			width: auto;
+			height: auto;
+			margin: 0 auto;
+			border-radius: 18px;
+		}
+
+		.lightbox-close {
+			position: absolute;
+			top: -10px;
+			right: -10px;
+			width: 44px;
+			height: 44px;
+			border: 0;
+			border-radius: 999px;
+			background: #13223d;
+			color: #fff;
+			font-size: 1.3rem;
+			cursor: pointer;
+			box-shadow: 0 12px 24px rgba(11, 22, 38, 0.28);
 		}
 
 		.section {
@@ -706,7 +777,13 @@
 			}
 
 			.mascot-panel {
-				min-height: 300px;
+				min-height: 320px;
+			}
+
+			.mascot-panel img {
+				width: min(100%, 390px);
+				transform: scale(1.06);
+				transform-origin: center bottom;
 			}
 
 			.mascot-note {
@@ -820,7 +897,10 @@
 				<div class="card flyer-frame">
 					<div class="flyer-grid">
 						<div class="flyer-art">
-							<img src="flyer.jpeg" alt="Flyer resmi tema IPDCEC 2026" />
+							<button class="flyer-trigger" type="button" data-flyer-trigger aria-label="Buka preview flyer resmi IPDCEC 2026">
+								<img src="flyer.jpeg" alt="Flyer resmi tema IPDCEC 2026" />
+								<span class="flyer-zoom">Klik untuk memperbesar flyer</span>
+							</button>
 						</div>
 						<div class="flyer-copy">
 							<span class="eyebrow">Official Flyer</span>
@@ -1030,6 +1110,13 @@
 		</section>
 	</main>
 
+	<div class="lightbox" id="flyerLightbox" aria-hidden="true">
+		<div class="lightbox-dialog" role="dialog" aria-modal="true" aria-label="Preview flyer resmi IPDCEC 2026">
+			<button class="lightbox-close" type="button" id="closeFlyerLightbox" aria-label="Tutup preview flyer">×</button>
+			<img src="flyer.jpeg" alt="Flyer resmi tema IPDCEC 2026 ukuran besar" />
+		</div>
+	</div>
+
 	<footer>
 		<div class="container">
 			<p>
@@ -1060,6 +1147,40 @@
 
 			updateCountdown();
 			setInterval(updateCountdown, 60000);
+		})();
+
+		(function () {
+			var lightbox = document.getElementById("flyerLightbox");
+			var closeBtn = document.getElementById("closeFlyerLightbox");
+			var triggers = document.querySelectorAll("[data-flyer-trigger]");
+
+			if (!lightbox || !closeBtn || !triggers.length) return;
+
+			function openLightbox() {
+				lightbox.classList.add("open");
+				lightbox.setAttribute("aria-hidden", "false");
+				document.body.style.overflow = "hidden";
+			}
+
+			function closeLightbox() {
+				lightbox.classList.remove("open");
+				lightbox.setAttribute("aria-hidden", "true");
+				document.body.style.overflow = "";
+			}
+
+			triggers.forEach(function (trigger) {
+				trigger.addEventListener("click", openLightbox);
+			});
+
+			closeBtn.addEventListener("click", closeLightbox);
+			lightbox.addEventListener("click", function (event) {
+				if (event.target === lightbox) closeLightbox();
+			});
+			document.addEventListener("keydown", function (event) {
+				if (event.key === "Escape" && lightbox.classList.contains("open")) {
+					closeLightbox();
+				}
+			});
 		})();
 	</script>
 </body>

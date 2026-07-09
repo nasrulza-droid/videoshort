@@ -302,6 +302,59 @@
       animation-delay: 0.08s;
     }
 
+    .mascot-panel {
+      position: relative;
+      overflow: hidden;
+      padding: 18px;
+      background:
+        radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.72)),
+        linear-gradient(145deg, #eef7ff 0%, #f6fff9 100%);
+      border: 1px solid #dbe8f4;
+      border-radius: var(--radius-md);
+      min-height: 380px;
+      display: grid;
+      align-items: end;
+    }
+
+    .mascot-panel::before {
+      content: "Meet the IPDCEC mascot";
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #1f5d7a;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid #d7e6f4;
+      border-radius: 999px;
+      padding: 8px 12px;
+      backdrop-filter: blur(10px);
+    }
+
+    .mascot-panel img {
+      width: min(100%, 360px);
+      height: auto;
+      margin: 34px auto 0;
+      display: block;
+      filter: drop-shadow(0 22px 34px rgba(20, 44, 72, 0.18));
+    }
+
+    .mascot-note {
+      position: absolute;
+      right: 16px;
+      bottom: 16px;
+      max-width: 190px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(21, 34, 56, 0.88);
+      color: #fff;
+      font-size: 0.9rem;
+      line-height: 1.45;
+      box-shadow: 0 16px 30px rgba(21, 34, 56, 0.18);
+    }
+
     .countdown {
       background: linear-gradient(155deg, #fff6ed 0%, #fff 100%);
       border: 1px solid #ffd5bd;
@@ -340,6 +393,133 @@
     .quick-link:hover {
       border-style: solid;
       background: #eef8ff;
+    }
+
+    .flyer-frame {
+      padding: 18px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(243, 249, 255, 0.95)),
+        radial-gradient(circle at top right, rgba(0, 166, 166, 0.12), transparent 30%);
+    }
+
+    .flyer-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 0.76fr) minmax(280px, 0.24fr);
+      gap: 18px;
+      align-items: center;
+    }
+
+    .flyer-art {
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid #d8e4f3;
+      background: #fff;
+      box-shadow: 0 22px 44px rgba(21, 34, 56, 0.14);
+    }
+
+    .flyer-trigger {
+      display: block;
+      width: 100%;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: zoom-in;
+    }
+
+    .flyer-art img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .flyer-zoom {
+      font-size: 0.84rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #23506f;
+      padding: 12px 16px;
+      border-top: 1px solid #d8e4f3;
+      background: linear-gradient(180deg, #ffffff, #f7fbff);
+    }
+
+    .flyer-copy {
+      display: grid;
+      gap: 12px;
+    }
+
+    .flyer-copy .eyebrow {
+      margin-bottom: 0;
+      width: fit-content;
+    }
+
+    .flyer-copy p {
+      color: var(--muted);
+    }
+
+    .flyer-points {
+      display: grid;
+      gap: 10px;
+    }
+
+    .flyer-points div {
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: #f7fbff;
+      border: 1px solid #dce7f4;
+      font-weight: 700;
+      color: #294766;
+    }
+
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(11, 22, 38, 0.82);
+      backdrop-filter: blur(10px);
+      z-index: 120;
+    }
+
+    .lightbox.open {
+      display: flex;
+    }
+
+    .lightbox-dialog {
+      position: relative;
+      width: min(960px, 92vw);
+      max-height: 90vh;
+      padding: 16px;
+      border-radius: 24px;
+      background: linear-gradient(180deg, #fefefe, #edf6ff);
+      box-shadow: 0 28px 60px rgba(8, 18, 34, 0.3);
+    }
+
+    .lightbox-dialog img {
+      display: block;
+      max-width: 100%;
+      max-height: calc(90vh - 32px);
+      width: auto;
+      height: auto;
+      margin: 0 auto;
+      border-radius: 18px;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      width: 44px;
+      height: 44px;
+      border: 0;
+      border-radius: 999px;
+      background: #13223d;
+      color: #fff;
+      font-size: 1.3rem;
+      cursor: pointer;
+      box-shadow: 0 12px 24px rgba(11, 22, 38, 0.28);
     }
 
     .section {
@@ -561,6 +741,10 @@
         grid-template-columns: 1fr;
       }
 
+      .flyer-grid {
+        grid-template-columns: 1fr;
+      }
+
       .meta-list {
         grid-template-columns: 1fr;
       }
@@ -583,6 +767,22 @@
       .hero-side,
       .cta {
         padding: 18px;
+      }
+
+      .mascot-panel {
+        min-height: 320px;
+      }
+
+      .mascot-panel img {
+        width: min(100%, 390px);
+        transform: scale(1.06);
+        transform-origin: center bottom;
+      }
+
+      .mascot-note {
+        position: static;
+        max-width: none;
+        margin-top: 10px;
       }
 
       .btn {
@@ -672,7 +872,42 @@
               <span>↗</span>
             </a>
           </div>
+
+          <div class="mascot-panel" aria-label="IPDCEC 2026 mascot">
+            <img src="mascot.png" alt="IPDCEC 2026 mascot" />
+            <div class="mascot-note">
+              The IPDCEC 2026 mascot brings a friendly, futuristic, and solution-driven face to this year's competition campaign.
+            </div>
+          </div>
         </aside>
+      </div>
+    </section>
+
+    <section class="section" id="flyer">
+      <div class="container">
+        <div class="card flyer-frame">
+          <div class="flyer-grid">
+            <div class="flyer-art">
+              <button class="flyer-trigger" type="button" data-flyer-trigger aria-label="Open the official IPDCEC 2026 flyer preview">
+                <img src="flyer.jpeg" alt="Official IPDCEC 2026 theme flyer" />
+                <span class="flyer-zoom">Click to enlarge the flyer</span>
+              </button>
+            </div>
+            <div class="flyer-copy">
+              <span class="eyebrow">Official Flyer</span>
+              <h2>Official Visual for the IPDCEC 2026 Theme</h2>
+              <p>
+                This flyer captures the core theme, six competition subthemes, and the sustainable innovation spirit that participants are invited to explore through their short videos.
+              </p>
+              <div class="flyer-points">
+                <div>Highlights the main competition theme in a quick, memorable way.</div>
+                <div>Helps participants align their ideas with the most relevant challenge areas.</div>
+                <div>Useful for resharing across schools, teams, and student communities.</div>
+              </div>
+              <a class="btn btn-primary" href="flyer.jpeg" target="_blank" rel="noopener noreferrer">Open Full-Size Flyer</a>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -861,6 +1096,13 @@
     </section>
   </main>
 
+  <div class="lightbox" id="flyerLightbox" aria-hidden="true">
+    <div class="lightbox-dialog" role="dialog" aria-modal="true" aria-label="Official IPDCEC 2026 flyer preview">
+      <button class="lightbox-close" type="button" id="closeFlyerLightbox" aria-label="Close flyer preview">×</button>
+      <img src="flyer.jpeg" alt="Official IPDCEC 2026 theme flyer in large view" />
+    </div>
+  </div>
+
   <footer>
     <div class="container">
       <p>
@@ -891,6 +1133,40 @@
 
       updateCountdown();
       setInterval(updateCountdown, 60000);
+    })();
+
+    (function () {
+      var lightbox = document.getElementById("flyerLightbox");
+      var closeBtn = document.getElementById("closeFlyerLightbox");
+      var triggers = document.querySelectorAll("[data-flyer-trigger]");
+
+      if (!lightbox || !closeBtn || !triggers.length) return;
+
+      function openLightbox() {
+        lightbox.classList.add("open");
+        lightbox.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeLightbox() {
+        lightbox.classList.remove("open");
+        lightbox.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+      }
+
+      triggers.forEach(function (trigger) {
+        trigger.addEventListener("click", openLightbox);
+      });
+
+      closeBtn.addEventListener("click", closeLightbox);
+      lightbox.addEventListener("click", function (event) {
+        if (event.target === lightbox) closeLightbox();
+      });
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" && lightbox.classList.contains("open")) {
+          closeLightbox();
+        }
+      });
     })();
   </script>
 </body>
