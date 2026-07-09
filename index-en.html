@@ -474,17 +474,21 @@
     .lightbox {
       position: fixed;
       inset: 0;
-      display: none;
+      display: flex;
       align-items: center;
       justify-content: center;
       padding: 24px;
       background: rgba(11, 22, 38, 0.82);
       backdrop-filter: blur(10px);
       z-index: 120;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.24s ease;
     }
 
     .lightbox.open {
-      display: flex;
+      opacity: 1;
+      pointer-events: auto;
     }
 
     .lightbox-dialog {
@@ -497,6 +501,14 @@
       box-shadow: 0 28px 60px rgba(8, 18, 34, 0.3);
       display: grid;
       gap: 12px;
+      transform: translateY(20px) scale(0.96);
+      opacity: 0;
+      transition: transform 0.26s ease, opacity 0.26s ease;
+    }
+
+    .lightbox.open .lightbox-dialog {
+      transform: translateY(0) scale(1);
+      opacity: 1;
     }
 
     .lightbox-dialog img {
@@ -528,6 +540,33 @@
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
+    }
+
+    .scroll-top {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      width: 46px;
+      height: 46px;
+      border: 0;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--brand) 0%, #ff8d28 100%);
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 16px 30px rgba(230, 82, 26, 0.34);
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 110;
+    }
+
+    .scroll-top.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
     }
 
     .lightbox-close {
@@ -810,6 +849,11 @@
 
       .lightbox-meta {
         align-items: stretch;
+      }
+
+      .scroll-top {
+        right: 14px;
+        bottom: 14px;
       }
 
       .btn {
@@ -1138,6 +1182,8 @@
     </div>
   </div>
 
+  <button class="scroll-top" id="scrollTopBtn" type="button" aria-label="Back to top">↑</button>
+
   <footer>
     <div class="container">
       <p>
@@ -1202,6 +1248,26 @@
           closeLightbox();
         }
       });
+    })();
+
+    (function () {
+      var btn = document.getElementById("scrollTopBtn");
+      if (!btn) return;
+
+      function syncScrollTop() {
+        if (window.scrollY > 360) {
+          btn.classList.add("show");
+        } else {
+          btn.classList.remove("show");
+        }
+      }
+
+      btn.addEventListener("click", function () {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+
+      window.addEventListener("scroll", syncScrollTop, { passive: true });
+      syncScrollTop();
     })();
   </script>
 </body>
