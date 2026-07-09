@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Pendaftaran - IPDCEC 2026</title>
+  <meta name="description" content="Halaman admin sederhana untuk melihat data pendaftar dari file CSV Google Form." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f5f8ff;
+      --surface: #ffffff;
+      --ink: #13223d;
+      --muted: #52607a;
+      --line: #d6deef;
+      --brand: #1f6fff;
+      --brand-soft: #ebf2ff;
+      --ok: #0f8a5f;
+      --warn: #c75b12;
+      --radius: 16px;
+      --shadow: 0 16px 36px rgba(19, 34, 61, 0.1);
+      --maxw: 1160px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Space Grotesk", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 92% 9%, rgba(31, 111, 255, 0.12), transparent 32%),
+        radial-gradient(circle at 10% 95%, rgba(15, 138, 95, 0.12), transparent 32%),
+        var(--bg);
+      min-height: 100vh;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .container {
+      width: min(var(--maxw), 94vw);
+      margin: 0 auto;
+    }
+
+    .top {
+      padding: 18px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      font-weight: 700;
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: var(--brand);
+      box-shadow: 0 0 0 6px rgba(31, 111, 255, 0.15);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-weight: 700;
+      background: var(--surface);
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--brand);
+      color: white;
+      border-color: var(--brand);
+    }
+
+    .hero {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 22px;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 {
+      font-size: clamp(1.4rem, 2.8vw, 2rem);
+      margin-bottom: 8px;
+    }
+
+    .hero p {
+      color: var(--muted);
+      max-width: 78ch;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: 1.25fr 0.75fr;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: 0 8px 24px rgba(19, 34, 61, 0.06);
+    }
+
+    .card h2 {
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .uploader {
+      border: 2px dashed #c5d4f0;
+      border-radius: 14px;
+      padding: 14px;
+      background: #f8fbff;
+    }
+
+    .uploader input[type="file"] {
+      margin-top: 8px;
+      width: 100%;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      background: #fbfdff;
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .stat b {
+      display: block;
+      font-size: 1.35rem;
+      margin-top: 4px;
+    }
+
+    .search {
+      margin-top: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .search input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font: inherit;
+    }
+
+    .table-wrap {
+      margin-top: 12px;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 860px;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid #e6ebf5;
+      padding: 10px;
+      text-align: left;
+      vertical-align: top;
+      font-size: 0.9rem;
+    }
+
+    th {
+      background: #f5f8ff;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: #38557f;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      background: var(--brand-soft);
+      color: #1d4fa8;
+    }
+
+    .status {
+      margin-top: 8px;
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+
+    .hint {
+      margin-top: 8px;
+      font-size: 0.86rem;
+      color: var(--warn);
+    }
+
+    .steps {
+      margin-top: 10px;
+      padding-left: 18px;
+      color: var(--muted);
+      display: grid;
+      gap: 8px;
+      font-size: 0.92rem;
+    }
+
+    @media (max-width: 980px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="top">
+      <div class="brand">
+        <span class="dot" aria-hidden="true"></span>
+        <span>Admin Pendaftaran IPDCEC 2026</span>
+      </div>
+      <div class="actions">
+        <a class="btn" href="index.html">Lihat Halaman Publik (ID)</a>
+        <a class="btn" href="index-en.html">Public Page (EN)</a>
+        <a class="btn btn-primary" href="https://forms.gle/R4UENDGfwAQR569k8" target="_blank" rel="noopener noreferrer">Buka Form Daftar</a>
+      </div>
+    </header>
+
+    <section class="hero">
+      <h1>Dashboard Sederhana Data Pendaftar</h1>
+      <p>
+        Halaman ini menampilkan data pendaftar dari file CSV hasil ekspor Google Form.
+        Alur cepat: buka Google Form responses, download CSV, lalu upload di sini.
+      </p>
+      <p class="hint">
+        Catatan: karena pendaftaran utama memakai Google Form, halaman ini tidak menarik data otomatis tanpa integrasi backend/API.
+      </p>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h2>Impor Data Pendaftar</h2>
+        <div class="uploader">
+          <p class="muted">Upload file CSV hasil ekspor respons Google Form.</p>
+          <input id="csvFile" type="file" accept=".csv,text/csv" />
+          <div class="actions" style="margin-top:10px;">
+            <button id="clearBtn" class="btn" type="button">Hapus Data Lokal</button>
+            <button id="downloadBtn" class="btn" type="button">Unduh CSV Tersaring</button>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;">
+          <h2 style="margin-bottom:8px;">Cara Ekspor CSV dari Google Form</h2>
+          <ol class="steps">
+            <li>Buka Google Form lomba, lalu masuk ke tab Responses.</li>
+            <li>Klik ikon spreadsheet untuk membuka respons di Google Sheets.</li>
+            <li>Di Google Sheets, klik File > Download > Comma Separated Values (.csv).</li>
+            <li>Upload file CSV tersebut ke halaman admin ini.</li>
+          </ol>
+        </div>
+
+        <div class="search">
+          <label for="searchInput" class="muted">Cari (nama, tim, sekolah, negara, email)</label>
+          <input id="searchInput" type="text" placeholder="Contoh: SMA 1, Indonesia, tim eco..." />
+        </div>
+
+        <div class="status" id="statusText">Belum ada data.</div>
+
+        <div class="table-wrap">
+          <table>
+            <thead id="thead"></thead>
+            <tbody id="tbody">
+              <tr><td class="muted">Data pendaftar akan muncul di sini.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <aside class="card">
+        <h2>Ringkasan</h2>
+        <div class="stats">
+          <div class="stat">
+            <span class="muted">Total Pendaftar</span>
+            <b id="totalRows">0</b>
+          </div>
+          <div class="stat">
+            <span class="muted">Total Negara (unik)</span>
+            <b id="totalCountries">0</b>
+          </div>
+          <div class="stat">
+            <span class="muted">Total Sekolah (unik)</span>
+            <b id="totalSchools">0</b>
+          </div>
+          <div class="stat">
+            <span class="muted">Tampilan Aktif</span>
+            <b id="filteredRows">0</b>
+          </div>
+        </div>
+
+        <div style="margin-top:14px;">
+          <h2 style="margin-bottom:8px;">Tips Penggunaan</h2>
+          <ul class="muted" style="padding-left:18px; display:grid; gap:8px;">
+            <li>Download CSV terbaru setiap hari dari Google Form Responses.</li>
+            <li>Upload CSV ke halaman ini untuk melihat data dalam tabel.</li>
+            <li>Gunakan kolom pencarian untuk filter cepat.</li>
+            <li>Data disimpan sementara di browser (localStorage) perangkat ini.</li>
+          </ul>
+        </div>
+
+        <div style="margin-top:14px;">
+          <span class="tag">No backend required</span>
+          <span class="tag">Works offline</span>
+          <span class="tag">Fast filtering</span>
+        </div>
+      </aside>
+    </section>
+  </div>
+
+  <script>
+    (function () {
+      var STORAGE_KEY = "ipdcec_admin_csv_rows_v1";
+      var rows = [];
+      var headers = [];
+      var filtered = [];
+      var preferredHeaderOrder = [
+        "timestamp",
+        "waktu",
+        "email",
+        "nama tim",
+        "team name",
+        "nama peserta",
+        "participant",
+        "asal sekolah",
+        "school",
+        "negara",
+        "country",
+        "instagram",
+        "judul karya",
+        "title"
+      ];
+
+      var csvFile = document.getElementById("csvFile");
+      var searchInput = document.getElementById("searchInput");
+      var clearBtn = document.getElementById("clearBtn");
+      var downloadBtn = document.getElementById("downloadBtn");
+
+      var thead = document.getElementById("thead");
+      var tbody = document.getElementById("tbody");
+      var statusText = document.getElementById("statusText");
+
+      function parseCSV(text) {
+        var result = [];
+        var row = [];
+        var cell = "";
+        var inQuotes = false;
+
+        for (var i = 0; i < text.length; i += 1) {
+          var ch = text[i];
+          var next = text[i + 1];
+
+          if (ch === '"') {
+            if (inQuotes && next === '"') {
+              cell += '"';
+              i += 1;
+            } else {
+              inQuotes = !inQuotes;
+            }
+          } else if (ch === "," && !inQuotes) {
+            row.push(cell);
+            cell = "";
+          } else if ((ch === "\n" || ch === "\r") && !inQuotes) {
+            if (ch === "\r" && next === "\n") {
+              i += 1;
+            }
+            row.push(cell);
+            cell = "";
+            if (row.length > 1 || row[0] !== "") {
+              result.push(row);
+            }
+            row = [];
+          } else {
+            cell += ch;
+          }
+        }
+
+        if (cell.length || row.length) {
+          row.push(cell);
+          result.push(row);
+        }
+
+        return result;
+      }
+
+      function normalizeMatrix(matrix) {
+        if (!matrix.length) return { headers: [], rows: [] };
+
+        var h = matrix[0].map(function (v) { return String(v || "").trim(); });
+        var dataRows = [];
+
+        for (var i = 1; i < matrix.length; i += 1) {
+          var line = matrix[i];
+          var obj = {};
+          for (var j = 0; j < h.length; j += 1) {
+            obj[h[j] || ("Column " + (j + 1))] = (line[j] || "").trim();
+          }
+
+          var hasAny = false;
+          for (var key in obj) {
+            if (Object.prototype.hasOwnProperty.call(obj, key) && obj[key]) {
+              hasAny = true;
+              break;
+            }
+          }
+
+          if (hasAny) {
+            dataRows.push(obj);
+          }
+        }
+
+        return { headers: h, rows: dataRows };
+      }
+
+      function saveLocal() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ headers: headers, rows: rows }));
+      }
+
+      function loadLocal() {
+        try {
+          var raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return;
+          var parsed = JSON.parse(raw);
+          headers = Array.isArray(parsed.headers) ? parsed.headers : [];
+          rows = Array.isArray(parsed.rows) ? parsed.rows : [];
+        } catch (err) {
+          headers = [];
+          rows = [];
+        }
+      }
+
+      function pickField(item, keywords) {
+        var keys = Object.keys(item);
+        for (var i = 0; i < keys.length; i += 1) {
+          var key = keys[i].toLowerCase();
+          for (var j = 0; j < keywords.length; j += 1) {
+            if (key.indexOf(keywords[j]) !== -1) {
+              return item[keys[i]] || "";
+            }
+          }
+        }
+        return "";
+      }
+
+      function getOrderedHeaders(rawHeaders) {
+        var scored = rawHeaders.map(function (h, idx) {
+          var key = String(h || "").toLowerCase();
+          var best = preferredHeaderOrder.length + 1;
+
+          for (var i = 0; i < preferredHeaderOrder.length; i += 1) {
+            if (key.indexOf(preferredHeaderOrder[i]) !== -1) {
+              best = i;
+              break;
+            }
+          }
+
+          return { value: h, rank: best, index: idx };
+        });
+
+        scored.sort(function (a, b) {
+          if (a.rank !== b.rank) return a.rank - b.rank;
+          return a.index - b.index;
+        });
+
+        return scored.map(function (x) { return x.value; });
+      }
+
+      function updateStats() {
+        var countries = new Set();
+        var schools = new Set();
+
+        rows.forEach(function (r) {
+          var country = pickField(r, ["country", "negara"]);
+          var school = pickField(r, ["school", "sekolah", "asal"]);
+          if (country) countries.add(country.toLowerCase());
+          if (school) schools.add(school.toLowerCase());
+        });
+
+        document.getElementById("totalRows").textContent = String(rows.length);
+        document.getElementById("filteredRows").textContent = String(filtered.length);
+        document.getElementById("totalCountries").textContent = String(countries.size);
+        document.getElementById("totalSchools").textContent = String(schools.size);
+      }
+
+      function renderTable() {
+        if (!headers.length || !rows.length) {
+          thead.innerHTML = "";
+          tbody.innerHTML = "<tr><td class='muted'>Data pendaftar akan muncul di sini.</td></tr>";
+          statusText.textContent = "Belum ada data.";
+          updateStats();
+          return;
+        }
+
+        var query = searchInput.value.trim().toLowerCase();
+        filtered = rows.filter(function (r) {
+          if (!query) return true;
+          var flat = Object.values(r).join(" ").toLowerCase();
+          return flat.indexOf(query) !== -1;
+        });
+
+        var orderedHeaders = getOrderedHeaders(headers);
+
+        thead.innerHTML = "<tr>" + orderedHeaders.map(function (h) {
+          return "<th>" + h.replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</th>";
+        }).join("") + "</tr>";
+
+        if (!filtered.length) {
+          tbody.innerHTML = "<tr><td class='muted' colspan='" + headers.length + "'>Tidak ada data sesuai pencarian.</td></tr>";
+        } else {
+          tbody.innerHTML = filtered.map(function (item) {
+            var tds = orderedHeaders.map(function (h) {
+              var val = (item[h] || "").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+              return "<td>" + (val || "-") + "</td>";
+            }).join("");
+            return "<tr>" + tds + "</tr>";
+          }).join("");
+        }
+
+        statusText.textContent = "Menampilkan " + filtered.length + " dari " + rows.length + " data pendaftar.";
+        updateStats();
+      }
+
+      function processCSVText(text) {
+        var matrix = parseCSV(text);
+        var normalized = normalizeMatrix(matrix);
+        headers = normalized.headers;
+        rows = normalized.rows;
+        filtered = rows.slice();
+        saveLocal();
+        renderTable();
+      }
+
+      function toCSV() {
+        if (!headers.length || !filtered.length) return "";
+
+        function esc(v) {
+          var s = String(v == null ? "" : v);
+          if (s.indexOf('"') !== -1 || s.indexOf(",") !== -1 || s.indexOf("\n") !== -1) {
+            return '"' + s.replace(/"/g, '""') + '"';
+          }
+          return s;
+        }
+
+        var lines = [];
+        lines.push(headers.map(esc).join(","));
+        filtered.forEach(function (row) {
+          lines.push(headers.map(function (h) { return esc(row[h] || ""); }).join(","));
+        });
+        return lines.join("\n");
+      }
+
+      csvFile.addEventListener("change", function (event) {
+        var file = event.target.files && event.target.files[0];
+        if (!file) return;
+
+        var reader = new FileReader();
+        reader.onload = function () {
+          processCSVText(String(reader.result || ""));
+          statusText.textContent = "File berhasil dimuat: " + file.name + ".";
+        };
+        reader.readAsText(file);
+      });
+
+      searchInput.addEventListener("input", renderTable);
+
+      clearBtn.addEventListener("click", function () {
+        headers = [];
+        rows = [];
+        filtered = [];
+        localStorage.removeItem(STORAGE_KEY);
+        renderTable();
+      });
+
+      downloadBtn.addEventListener("click", function () {
+        var csv = toCSV();
+        if (!csv) {
+          statusText.textContent = "Tidak ada data untuk diunduh.";
+          return;
+        }
+
+        var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = "ipdcec-registrants-filtered.csv";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+
+      loadLocal();
+      filtered = rows.slice();
+      renderTable();
+    })();
+  </script>
+</body>
+</html>
