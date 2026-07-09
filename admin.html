@@ -3,47 +3,61 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Pendaftaran - IPDCEC 2026</title>
-  <meta name="description" content="Halaman admin sederhana untuk melihat data pendaftar dari file CSV Google Form." />
+  <title>Admin Login - IPDCEC 2026</title>
+  <meta
+    name="description"
+    content="Halaman admin IPDCEC 2026 dengan login dan database Supabase untuk mengelola data pendaftar."
+  />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #f5f8ff;
+      --bg: #f4f8ff;
       --surface: #ffffff;
+      --surface-soft: #f8fbff;
       --ink: #13223d;
-      --muted: #52607a;
-      --line: #d6deef;
-      --brand: #1f6fff;
-      --brand-soft: #ebf2ff;
-      --ok: #0f8a5f;
+      --muted: #5b6b86;
+      --line: #d5dff0;
+      --brand: #1768ff;
+      --brand-dark: #0d4fc9;
+      --accent: #0f8a5f;
       --warn: #c75b12;
-      --radius: 16px;
-      --shadow: 0 16px 36px rgba(19, 34, 61, 0.1);
-      --maxw: 1160px;
+      --danger: #c43737;
+      --shadow: 0 16px 38px rgba(19, 34, 61, 0.1);
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+      --maxw: 1180px;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
       font-family: "Space Grotesk", sans-serif;
       color: var(--ink);
       background:
-        radial-gradient(circle at 92% 9%, rgba(31, 111, 255, 0.12), transparent 32%),
+        radial-gradient(circle at 92% 9%, rgba(23, 104, 255, 0.12), transparent 32%),
         radial-gradient(circle at 10% 95%, rgba(15, 138, 95, 0.12), transparent 32%),
-        var(--bg);
+        linear-gradient(180deg, #f7faff 0%, #edf5ff 100%);
       min-height: 100vh;
     }
 
-    a { color: inherit; text-decoration: none; }
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
 
     .container {
       width: min(var(--maxw), 94vw);
       margin: 0 auto;
     }
 
-    .top {
+    .topbar {
       padding: 18px 0;
       display: flex;
       justify-content: space-between;
@@ -53,598 +67,943 @@
     }
 
     .brand {
-      font-weight: 700;
-      font-size: 1.05rem;
       display: flex;
       align-items: center;
       gap: 10px;
+      font-weight: 700;
+      font-size: 1.02rem;
     }
 
-    .dot {
+    .brand-dot {
       width: 12px;
       height: 12px;
       border-radius: 999px;
       background: var(--brand);
-      box-shadow: 0 0 0 6px rgba(31, 111, 255, 0.15);
+      box-shadow: 0 0 0 6px rgba(23, 104, 255, 0.15);
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .btn,
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
     }
 
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 8px;
       border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 10px 16px;
-      font-weight: 700;
       background: var(--surface);
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 11px 16px;
+      font-weight: 700;
       cursor: pointer;
     }
 
     .btn-primary {
       background: var(--brand);
-      color: white;
       border-color: var(--brand);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--brand-dark);
+      border-color: var(--brand-dark);
+    }
+
+    .btn-danger {
+      background: #fff2f2;
+      border-color: #f3c7c7;
+      color: var(--danger);
+    }
+
+    .hero,
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
     }
 
     .hero {
-      background: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      box-shadow: var(--shadow);
-      padding: 22px;
+      padding: 24px;
       margin-bottom: 16px;
     }
 
     .hero h1 {
-      font-size: clamp(1.4rem, 2.8vw, 2rem);
+      font-size: clamp(1.5rem, 2.8vw, 2rem);
       margin-bottom: 8px;
     }
 
     .hero p {
       color: var(--muted);
-      max-width: 78ch;
+      max-width: 74ch;
     }
 
-    .actions {
-      display: flex;
-      gap: 10px;
+    .notice {
       margin-top: 14px;
-      flex-wrap: wrap;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 1px solid #ffd9bc;
+      background: #fff6ee;
+      color: #8a4719;
     }
 
-    .grid {
+    .layout {
       display: grid;
-      gap: 14px;
-      grid-template-columns: 1.25fr 0.75fr;
+      grid-template-columns: 360px 1fr;
+      gap: 16px;
+      padding-bottom: 28px;
     }
 
     .card {
-      background: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 16px;
-      box-shadow: 0 8px 24px rgba(19, 34, 61, 0.06);
+      padding: 18px;
     }
 
     .card h2 {
-      font-size: 1rem;
+      font-size: 1.02rem;
       margin-bottom: 10px;
     }
 
     .muted {
       color: var(--muted);
-      font-size: 0.92rem;
+      font-size: 0.93rem;
     }
 
-    .uploader {
-      border: 2px dashed #c5d4f0;
-      border-radius: 14px;
-      padding: 14px;
-      background: #f8fbff;
+    .stack {
+      display: grid;
+      gap: 14px;
     }
 
-    .uploader input[type="file"] {
-      margin-top: 8px;
+    .field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .field label {
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .field input,
+    .field textarea,
+    .field select {
       width: 100%;
+      border: 1px solid var(--line);
+      background: var(--surface-soft);
+      border-radius: 12px;
+      padding: 11px 12px;
+      color: var(--ink);
+    }
+
+    .field textarea {
+      min-height: 92px;
+      resize: vertical;
+    }
+
+    .meta {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .hidden {
+      display: none !important;
     }
 
     .stats {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-      margin-top: 12px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
     }
 
     .stat {
-      border: 1px solid var(--line);
       background: #fbfdff;
-      border-radius: 12px;
-      padding: 12px;
-    }
-
-    .stat b {
-      display: block;
-      font-size: 1.35rem;
-      margin-top: 4px;
-    }
-
-    .search {
-      margin-top: 12px;
-      display: grid;
-      gap: 8px;
-    }
-
-    .search input {
-      width: 100%;
       border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 10px 12px;
-      font: inherit;
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 0.86rem;
+      display: block;
+    }
+
+    .stat strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 1.4rem;
+    }
+
+    .inline-tools {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .search-box {
+      margin-top: 14px;
     }
 
     .table-wrap {
-      margin-top: 12px;
+      margin-top: 14px;
       overflow: auto;
       border: 1px solid var(--line);
-      border-radius: 12px;
+      border-radius: 14px;
+      background: var(--surface);
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 860px;
+      min-width: 1120px;
     }
 
     th,
     td {
-      border-bottom: 1px solid #e6ebf5;
-      padding: 10px;
+      border-bottom: 1px solid #e8eef8;
+      padding: 12px;
       text-align: left;
       vertical-align: top;
       font-size: 0.9rem;
     }
 
     th {
+      position: sticky;
+      top: 0;
       background: #f5f8ff;
-      font-size: 0.82rem;
+      color: #35557f;
       text-transform: uppercase;
-      letter-spacing: 0.4px;
-      color: #38557f;
+      letter-spacing: 0.35px;
+      font-size: 0.8rem;
+      z-index: 1;
     }
 
-    .tag {
+    .pill {
       display: inline-flex;
       align-items: center;
+      padding: 4px 9px;
       border-radius: 999px;
-      padding: 3px 8px;
       font-size: 0.78rem;
       font-weight: 700;
-      background: var(--brand-soft);
-      color: #1d4fa8;
+      border: 1px solid var(--line);
+      background: #f6f9ff;
+      color: #35557f;
     }
 
-    .status {
-      margin-top: 8px;
-      font-size: 0.88rem;
-      color: var(--muted);
+    .pill.pending {
+      background: #fff6ee;
+      border-color: #ffd9bc;
+      color: #8a4719;
     }
 
-    .hint {
-      margin-top: 8px;
-      font-size: 0.86rem;
-      color: var(--warn);
+    .pill.verified {
+      background: #eefbf5;
+      border-color: #bfe9d0;
+      color: #196a4a;
     }
 
-    .steps {
-      margin-top: 10px;
-      padding-left: 18px;
-      color: var(--muted);
+    .pill.incomplete {
+      background: #fff7e7;
+      border-color: #f5deb1;
+      color: #8a6516;
+    }
+
+    .pill.rejected {
+      background: #fff0f0;
+      border-color: #efc0c0;
+      color: #9a2626;
+    }
+
+    .row-actions {
       display: grid;
       gap: 8px;
+      min-width: 180px;
+    }
+
+    .small {
+      font-size: 0.84rem;
+    }
+
+    .status-line {
+      margin-top: 10px;
+      min-height: 22px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .help-list {
+      padding-left: 18px;
+      display: grid;
+      gap: 8px;
+      color: var(--muted);
       font-size: 0.92rem;
     }
 
-    @media (max-width: 980px) {
-      .grid {
+    code {
+      font-family: Consolas, monospace;
+      font-size: 0.88rem;
+      background: #edf3ff;
+      padding: 2px 6px;
+      border-radius: 8px;
+    }
+
+    @media (max-width: 1024px) {
+      .layout {
         grid-template-columns: 1fr;
       }
 
       .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .stats {
         grid-template-columns: 1fr;
+      }
+
+      .actions,
+      .inline-tools {
+        width: 100%;
+      }
+
+      .btn {
+        width: 100%;
       }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <header class="top">
+    <header class="topbar">
       <div class="brand">
-        <span class="dot" aria-hidden="true"></span>
-        <span>Admin Pendaftaran IPDCEC 2026</span>
+        <span class="brand-dot" aria-hidden="true"></span>
+        <span>Admin IPDCEC 2026</span>
       </div>
       <div class="actions">
-        <a class="btn" href="index.html">Lihat Halaman Publik (ID)</a>
-        <a class="btn" href="index-en.html">Public Page (EN)</a>
+        <a class="btn" href="index.html">Halaman Publik ID</a>
+        <a class="btn" href="index-en.html">Public Page EN</a>
         <a class="btn btn-primary" href="https://forms.gle/R4UENDGfwAQR569k8" target="_blank" rel="noopener noreferrer">Buka Form Daftar</a>
       </div>
     </header>
 
     <section class="hero">
-      <h1>Dashboard Sederhana Data Pendaftar</h1>
+      <h1>Login Admin dan Database Pendaftar</h1>
       <p>
-        Halaman ini menampilkan data pendaftar dari file CSV hasil ekspor Google Form.
-        Alur cepat: buka Google Form responses, download CSV, lalu upload di sini.
+        Halaman ini dirancang untuk GitHub Pages dengan backend eksternal Supabase. Admin login memakai
+        Supabase Auth, dan data pendaftar disimpan di tabel database sehingga tidak lagi bergantung pada file lokal browser.
       </p>
-      <p class="hint">
-        Catatan: karena pendaftaran utama memakai Google Form, halaman ini tidak menarik data otomatis tanpa integrasi backend/API.
-      </p>
+      <div class="notice" id="setupNotice">
+        Konfigurasi Supabase belum diisi. Buka file <code>supabase-config.js</code>, masukkan URL dan anon key project Supabase,
+        lalu refresh halaman ini.
+      </div>
     </section>
 
-    <section class="grid">
-      <article class="card">
-        <h2>Impor Data Pendaftar</h2>
-        <div class="uploader">
-          <p class="muted">Upload file CSV hasil ekspor respons Google Form.</p>
-          <input id="csvFile" type="file" accept=".csv,text/csv" />
-          <div class="actions" style="margin-top:10px;">
-            <button id="clearBtn" class="btn" type="button">Hapus Data Lokal</button>
-            <button id="downloadBtn" class="btn" type="button">Unduh CSV Tersaring</button>
+    <main class="layout">
+      <section class="stack">
+        <article class="card" id="authCard">
+          <h2>Login Admin</h2>
+          <p class="muted">Gunakan akun admin yang sudah dibuat di Supabase Authentication.</p>
+          <div class="stack" style="margin-top: 14px;">
+            <div class="field">
+              <label for="emailInput">Email Admin</label>
+              <input id="emailInput" type="email" placeholder="admin@ipdcec.online" autocomplete="username" />
+            </div>
+            <div class="field">
+              <label for="passwordInput">Password</label>
+              <input id="passwordInput" type="password" placeholder="Masukkan password" autocomplete="current-password" />
+            </div>
+            <button class="btn btn-primary" id="loginBtn" type="button">Login</button>
+          </div>
+          <div class="status-line" id="authStatus"></div>
+          <div class="meta">
+            <span>Model ini cocok untuk GitHub Pages karena frontend tetap statis.</span>
+            <span>Hak akses admin dikontrol lewat Supabase Auth, bukan link publik semata.</span>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Setup Singkat</h2>
+          <ol class="help-list">
+            <li>Buat project Supabase dan aktifkan email/password login.</li>
+            <li>Jalankan SQL di file <code>SUPABASE_SETUP.md</code> untuk membuat tabel <code>registrations</code>.</li>
+            <li>Edit <code>supabase-config.js</code> dan isi URL + anon key.</li>
+            <li>Buat user admin di Supabase Authentication.</li>
+            <li>Login di halaman ini, lalu impor CSV hasil Google Form ke database.</li>
+          </ol>
+        </article>
+      </section>
+
+      <section class="card hidden" id="dashboardCard">
+        <div style="display:flex; justify-content:space-between; gap:12px; align-items:start; flex-wrap:wrap;">
+          <div>
+            <h2>Dashboard Admin</h2>
+            <p class="muted" id="sessionInfo">Memuat sesi admin...</p>
+          </div>
+          <div class="actions">
+            <button class="btn" id="refreshBtn" type="button">Refresh Data</button>
+            <button class="btn btn-danger" id="logoutBtn" type="button">Logout</button>
           </div>
         </div>
 
-        <div style="margin-top:12px;">
-          <h2 style="margin-bottom:8px;">Cara Ekspor CSV dari Google Form</h2>
-          <ol class="steps">
-            <li>Buka Google Form lomba, lalu masuk ke tab Responses.</li>
-            <li>Klik ikon spreadsheet untuk membuka respons di Google Sheets.</li>
-            <li>Di Google Sheets, klik File > Download > Comma Separated Values (.csv).</li>
-            <li>Upload file CSV tersebut ke halaman admin ini.</li>
-          </ol>
+        <div class="stats">
+          <div class="stat">
+            <span>Total Pendaftar</span>
+            <strong id="statTotal">0</strong>
+          </div>
+          <div class="stat">
+            <span>Negara Unik</span>
+            <strong id="statCountries">0</strong>
+          </div>
+          <div class="stat">
+            <span>Sekolah Unik</span>
+            <strong id="statSchools">0</strong>
+          </div>
+          <div class="stat">
+            <span>Data Tampil</span>
+            <strong id="statFiltered">0</strong>
+          </div>
         </div>
 
-        <div class="search">
-          <label for="searchInput" class="muted">Cari (nama, tim, sekolah, negara, email)</label>
-          <input id="searchInput" type="text" placeholder="Contoh: SMA 1, Indonesia, tim eco..." />
+        <div class="inline-tools">
+          <input id="csvInput" type="file" accept=".csv,text/csv" />
+          <button class="btn btn-primary" id="importBtn" type="button">Impor CSV ke Database</button>
+          <button class="btn" id="downloadBtn" type="button">Unduh CSV Tampilan</button>
         </div>
 
-        <div class="status" id="statusText">Belum ada data.</div>
+        <div class="field search-box">
+          <label for="searchInput">Cari nama, sekolah, negara, email, judul karya</label>
+          <input id="searchInput" type="text" placeholder="Contoh: Indonesia, SMA, eco team" />
+        </div>
+
+        <div class="status-line" id="dashboardStatus"></div>
 
         <div class="table-wrap">
           <table>
-            <thead id="thead"></thead>
-            <tbody id="tbody">
-              <tr><td class="muted">Data pendaftar akan muncul di sini.</td></tr>
+            <thead>
+              <tr>
+                <th>Peserta</th>
+                <th>Sekolah</th>
+                <th>Kontak</th>
+                <th>Karya</th>
+                <th>Status</th>
+                <th>Aksi Admin</th>
+              </tr>
+            </thead>
+            <tbody id="rowsBody">
+              <tr>
+                <td colspan="6" class="muted">Belum ada data.</td>
+              </tr>
             </tbody>
           </table>
         </div>
-      </article>
-
-      <aside class="card">
-        <h2>Ringkasan</h2>
-        <div class="stats">
-          <div class="stat">
-            <span class="muted">Total Pendaftar</span>
-            <b id="totalRows">0</b>
-          </div>
-          <div class="stat">
-            <span class="muted">Total Negara (unik)</span>
-            <b id="totalCountries">0</b>
-          </div>
-          <div class="stat">
-            <span class="muted">Total Sekolah (unik)</span>
-            <b id="totalSchools">0</b>
-          </div>
-          <div class="stat">
-            <span class="muted">Tampilan Aktif</span>
-            <b id="filteredRows">0</b>
-          </div>
-        </div>
-
-        <div style="margin-top:14px;">
-          <h2 style="margin-bottom:8px;">Tips Penggunaan</h2>
-          <ul class="muted" style="padding-left:18px; display:grid; gap:8px;">
-            <li>Download CSV terbaru setiap hari dari Google Form Responses.</li>
-            <li>Upload CSV ke halaman ini untuk melihat data dalam tabel.</li>
-            <li>Gunakan kolom pencarian untuk filter cepat.</li>
-            <li>Data disimpan sementara di browser (localStorage) perangkat ini.</li>
-          </ul>
-        </div>
-
-        <div style="margin-top:14px;">
-          <span class="tag">No backend required</span>
-          <span class="tag">Works offline</span>
-          <span class="tag">Fast filtering</span>
-        </div>
-      </aside>
-    </section>
+      </section>
+    </main>
   </div>
 
-  <script>
-    (function () {
-      var STORAGE_KEY = "ipdcec_admin_csv_rows_v1";
-      var rows = [];
-      var headers = [];
-      var filtered = [];
-      var preferredHeaderOrder = [
-        "timestamp",
-        "waktu",
-        "email",
-        "nama tim",
-        "team name",
-        "nama peserta",
-        "participant",
-        "asal sekolah",
-        "school",
-        "negara",
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+    import { SUPABASE_CONFIG } from "./supabase-config.js";
+
+    const PLACEHOLDER_URL = "https://your-project-id.supabase.co";
+    const PLACEHOLDER_KEY = "your-public-anon-key";
+    const STATUS_OPTIONS = ["pending", "verified", "incomplete", "rejected"];
+
+    const setupNotice = document.getElementById("setupNotice");
+    const authCard = document.getElementById("authCard");
+    const dashboardCard = document.getElementById("dashboardCard");
+    const emailInput = document.getElementById("emailInput");
+    const passwordInput = document.getElementById("passwordInput");
+    const loginBtn = document.getElementById("loginBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const importBtn = document.getElementById("importBtn");
+    const downloadBtn = document.getElementById("downloadBtn");
+    const csvInput = document.getElementById("csvInput");
+    const searchInput = document.getElementById("searchInput");
+    const authStatus = document.getElementById("authStatus");
+    const dashboardStatus = document.getElementById("dashboardStatus");
+    const sessionInfo = document.getElementById("sessionInfo");
+    const rowsBody = document.getElementById("rowsBody");
+
+    const statTotal = document.getElementById("statTotal");
+    const statCountries = document.getElementById("statCountries");
+    const statSchools = document.getElementById("statSchools");
+    const statFiltered = document.getElementById("statFiltered");
+
+    const state = {
+      rows: [],
+      filteredRows: [],
+      client: null
+    };
+
+    function setText(el, text, isError) {
+      el.textContent = text;
+      el.style.color = isError ? "var(--danger)" : "var(--muted)";
+    }
+
+    function hasValidConfig() {
+      return SUPABASE_CONFIG &&
+        SUPABASE_CONFIG.url &&
+        SUPABASE_CONFIG.anonKey &&
+        SUPABASE_CONFIG.url !== PLACEHOLDER_URL &&
+        SUPABASE_CONFIG.anonKey !== PLACEHOLDER_KEY;
+    }
+
+    function escapeHtml(value) {
+      return String(value == null ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function parseCSV(text) {
+      const result = [];
+      let row = [];
+      let cell = "";
+      let inQuotes = false;
+
+      for (let i = 0; i < text.length; i += 1) {
+        const ch = text[i];
+        const next = text[i + 1];
+
+        if (ch === '"') {
+          if (inQuotes && next === '"') {
+            cell += '"';
+            i += 1;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (ch === "," && !inQuotes) {
+          row.push(cell);
+          cell = "";
+        } else if ((ch === "\n" || ch === "\r") && !inQuotes) {
+          if (ch === "\r" && next === "\n") {
+            i += 1;
+          }
+          row.push(cell);
+          cell = "";
+          if (row.length > 1 || row[0] !== "") {
+            result.push(row);
+          }
+          row = [];
+        } else {
+          cell += ch;
+        }
+      }
+
+      if (cell.length || row.length) {
+        row.push(cell);
+        result.push(row);
+      }
+
+      return result;
+    }
+
+    function matrixToObjects(matrix) {
+      if (!matrix.length) return [];
+
+      const headers = matrix[0].map((value, index) => String(value || "").trim() || `Column ${index + 1}`);
+      return matrix.slice(1)
+        .map((line) => {
+          const obj = {};
+          headers.forEach((header, index) => {
+            obj[header] = String(line[index] || "").trim();
+          });
+          return obj;
+        })
+        .filter((obj) => Object.values(obj).some(Boolean));
+    }
+
+    function pickField(row, keywords) {
+      const keys = Object.keys(row);
+      for (const key of keys) {
+        const normalized = key.toLowerCase();
+        for (const keyword of keywords) {
+          if (normalized.includes(keyword)) {
+            return row[key] || "";
+          }
+        }
+      }
+      return "";
+    }
+
+    function buildEntryKey(normalized) {
+      return [normalized.email, normalized.team_name, normalized.work_title, normalized.submitted_at]
+        .filter(Boolean)
+        .join("|")
+        .toLowerCase()
+        .replace(/\s+/g, "-");
+    }
+
+    function normalizeRegistrationRow(row) {
+      const normalized = {
+        submitted_at: pickField(row, ["timestamp", "waktu"]) || new Date().toISOString(),
+        team_name: pickField(row, ["nama tim", "team name", "team"]),
+        participant_name: pickField(row, ["nama peserta", "participant", "nama lengkap", "full name"]),
+        school_name: pickField(row, ["school", "sekolah", "asal sekolah"]),
+        country: pickField(row, ["country", "negara"]),
+        email: pickField(row, ["email"]),
+        phone: pickField(row, ["phone", "whatsapp", "nomor", "no hp"]),
+        instagram: pickField(row, ["instagram", "ig"]),
+        work_title: pickField(row, ["judul karya", "title", "judul"]),
+        verification_status: "pending",
+        admin_notes: "",
+        raw_data: row
+      };
+
+      normalized.entry_key = buildEntryKey(normalized) || `entry-${crypto.randomUUID()}`;
+      return normalized;
+    }
+
+    function renderStats(rows) {
+      const countries = new Set();
+      const schools = new Set();
+
+      state.rows.forEach((row) => {
+        if (row.country) countries.add(String(row.country).toLowerCase());
+        if (row.school_name) schools.add(String(row.school_name).toLowerCase());
+      });
+
+      statTotal.textContent = String(state.rows.length);
+      statCountries.textContent = String(countries.size);
+      statSchools.textContent = String(schools.size);
+      statFiltered.textContent = String(rows.length);
+    }
+
+    function getStatusPill(status) {
+      const safe = STATUS_OPTIONS.includes(status) ? status : "pending";
+      return `<span class="pill ${safe}">${escapeHtml(safe)}</span>`;
+    }
+
+    function renderRows() {
+      const query = searchInput.value.trim().toLowerCase();
+      state.filteredRows = state.rows.filter((row) => {
+        if (!query) return true;
+        return [
+          row.team_name,
+          row.participant_name,
+          row.school_name,
+          row.country,
+          row.email,
+          row.work_title,
+          row.instagram
+        ].join(" ").toLowerCase().includes(query);
+      });
+
+      renderStats(state.filteredRows);
+
+      if (!state.filteredRows.length) {
+        rowsBody.innerHTML = '<tr><td colspan="6" class="muted">Tidak ada data yang cocok.</td></tr>';
+        return;
+      }
+
+      rowsBody.innerHTML = state.filteredRows.map((row) => {
+        const safeId = escapeHtml(row.id);
+        const safeNotes = escapeHtml(row.admin_notes || "");
+        const safeParticipant = escapeHtml(row.participant_name || "-");
+        const safeTeam = escapeHtml(row.team_name || "-");
+        const safeSchool = escapeHtml(row.school_name || "-");
+        const safeCountry = escapeHtml(row.country || "-");
+        const safeEmail = escapeHtml(row.email || "-");
+        const safePhone = escapeHtml(row.phone || "-");
+        const safeInstagram = escapeHtml(row.instagram || "-");
+        const safeTitle = escapeHtml(row.work_title || "-");
+        const safeDate = escapeHtml(row.submitted_at || "-");
+
+        return `
+          <tr>
+            <td>
+              <strong>${safeParticipant}</strong><br />
+              <span class="small muted">Tim: ${safeTeam}</span><br />
+              <span class="small muted">Submit: ${safeDate}</span>
+            </td>
+            <td>
+              ${safeSchool}<br />
+              <span class="small muted">${safeCountry}</span>
+            </td>
+            <td>
+              <div>${safeEmail}</div>
+              <div class="small muted">${safePhone}</div>
+              <div class="small muted">${safeInstagram}</div>
+            </td>
+            <td>
+              <strong>${safeTitle}</strong><br />
+              <span class="small muted">Key: ${escapeHtml(row.entry_key || "-")}</span>
+            </td>
+            <td>${getStatusPill(row.verification_status)}</td>
+            <td>
+              <div class="row-actions">
+                <select data-role="status" data-id="${safeId}">
+                  ${STATUS_OPTIONS.map((option) => `<option value="${option}" ${row.verification_status === option ? "selected" : ""}>${option}</option>`).join("")}
+                </select>
+                <textarea data-role="notes" data-id="${safeId}" placeholder="Catatan admin">${safeNotes}</textarea>
+                <button class="btn btn-primary small" type="button" data-role="save" data-id="${safeId}">Simpan</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    async function loadRegistrations() {
+      setText(dashboardStatus, "Memuat data pendaftar...");
+      const { data, error } = await state.client
+        .from("registrations")
+        .select("id, entry_key, submitted_at, team_name, participant_name, school_name, country, email, phone, instagram, work_title, verification_status, admin_notes")
+        .order("submitted_at", { ascending: false });
+
+      if (error) {
+        setText(dashboardStatus, `Gagal memuat data: ${error.message}`, true);
+        return;
+      }
+
+      state.rows = data || [];
+      renderRows();
+      setText(dashboardStatus, `Data termuat: ${state.rows.length} pendaftar.`);
+    }
+
+    async function saveRow(id) {
+      const statusEl = document.querySelector(`[data-role="status"][data-id="${CSS.escape(id)}"]`);
+      const notesEl = document.querySelector(`[data-role="notes"][data-id="${CSS.escape(id)}"]`);
+      if (!statusEl || !notesEl) return;
+
+      const payload = {
+        verification_status: statusEl.value,
+        admin_notes: notesEl.value.trim(),
+        updated_at: new Date().toISOString()
+      };
+
+      setText(dashboardStatus, "Menyimpan perubahan admin...");
+      const { error } = await state.client
+        .from("registrations")
+        .update(payload)
+        .eq("id", id);
+
+      if (error) {
+        setText(dashboardStatus, `Gagal menyimpan: ${error.message}`, true);
+        return;
+      }
+
+      const localRow = state.rows.find((row) => row.id === id);
+      if (localRow) {
+        localRow.verification_status = payload.verification_status;
+        localRow.admin_notes = payload.admin_notes;
+      }
+      renderRows();
+      setText(dashboardStatus, "Perubahan admin berhasil disimpan.");
+    }
+
+    function exportFilteredCSV() {
+      if (!state.filteredRows.length) {
+        setText(dashboardStatus, "Tidak ada data untuk diunduh.", true);
+        return;
+      }
+
+      const headers = [
+        "submitted_at",
+        "participant_name",
+        "team_name",
+        "school_name",
         "country",
+        "email",
+        "phone",
         "instagram",
-        "judul karya",
-        "title"
+        "work_title",
+        "verification_status",
+        "admin_notes",
+        "entry_key"
       ];
 
-      var csvFile = document.getElementById("csvFile");
-      var searchInput = document.getElementById("searchInput");
-      var clearBtn = document.getElementById("clearBtn");
-      var downloadBtn = document.getElementById("downloadBtn");
-
-      var thead = document.getElementById("thead");
-      var tbody = document.getElementById("tbody");
-      var statusText = document.getElementById("statusText");
-
-      function parseCSV(text) {
-        var result = [];
-        var row = [];
-        var cell = "";
-        var inQuotes = false;
-
-        for (var i = 0; i < text.length; i += 1) {
-          var ch = text[i];
-          var next = text[i + 1];
-
-          if (ch === '"') {
-            if (inQuotes && next === '"') {
-              cell += '"';
-              i += 1;
-            } else {
-              inQuotes = !inQuotes;
-            }
-          } else if (ch === "," && !inQuotes) {
-            row.push(cell);
-            cell = "";
-          } else if ((ch === "\n" || ch === "\r") && !inQuotes) {
-            if (ch === "\r" && next === "\n") {
-              i += 1;
-            }
-            row.push(cell);
-            cell = "";
-            if (row.length > 1 || row[0] !== "") {
-              result.push(row);
-            }
-            row = [];
-          } else {
-            cell += ch;
-          }
+      const escapeCsv = (value) => {
+        const text = String(value == null ? "" : value);
+        if (text.includes('"') || text.includes(",") || text.includes("\n")) {
+          return `"${text.replace(/"/g, '""')}"`;
         }
+        return text;
+      };
 
-        if (cell.length || row.length) {
-          row.push(cell);
-          result.push(row);
-        }
+      const lines = [headers.join(",")];
+      state.filteredRows.forEach((row) => {
+        lines.push(headers.map((header) => escapeCsv(row[header] || "")).join(","));
+      });
 
-        return result;
+      const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "ipdcec-registrations.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    async function importCSVToDatabase() {
+      const file = csvInput.files && csvInput.files[0];
+      if (!file) {
+        setText(dashboardStatus, "Pilih file CSV dulu sebelum impor.", true);
+        return;
       }
 
-      function normalizeMatrix(matrix) {
-        if (!matrix.length) return { headers: [], rows: [] };
+      setText(dashboardStatus, `Membaca file ${file.name}...`);
+      const text = await file.text();
+      const objects = matrixToObjects(parseCSV(text));
+      const payload = objects.map(normalizeRegistrationRow);
 
-        var h = matrix[0].map(function (v) { return String(v || "").trim(); });
-        var dataRows = [];
+      if (!payload.length) {
+        setText(dashboardStatus, "CSV kosong atau format tidak terbaca.", true);
+        return;
+      }
 
-        for (var i = 1; i < matrix.length; i += 1) {
-          var line = matrix[i];
-          var obj = {};
-          for (var j = 0; j < h.length; j += 1) {
-            obj[h[j] || ("Column " + (j + 1))] = (line[j] || "").trim();
+      setText(dashboardStatus, `Mengimpor ${payload.length} data ke Supabase...`);
+      const { error } = await state.client
+        .from("registrations")
+        .upsert(payload, { onConflict: "entry_key" });
+
+      if (error) {
+        setText(dashboardStatus, `Impor gagal: ${error.message}`, true);
+        return;
+      }
+
+      setText(dashboardStatus, `Impor berhasil: ${payload.length} data diproses.`);
+      await loadRegistrations();
+    }
+
+    async function ensureAdmin(email) {
+      const { data, error } = await state.client
+        .from("admin_users")
+        .select("email")
+        .eq("email", email)
+        .maybeSingle();
+
+      if (error) {
+        setText(authStatus, `Gagal memeriksa hak akses admin: ${error.message}`, true);
+        return false;
+      }
+
+      if (!data) {
+        await state.client.auth.signOut();
+        setText(authStatus, "Akun ini berhasil login, tetapi belum terdaftar sebagai admin.", true);
+        return false;
+      }
+
+      return true;
+    }
+
+    function showLoggedOutState() {
+      authCard.classList.remove("hidden");
+      dashboardCard.classList.add("hidden");
+      sessionInfo.textContent = "Belum login.";
+    }
+
+    function showLoggedInState(email) {
+      authCard.classList.add("hidden");
+      dashboardCard.classList.remove("hidden");
+      sessionInfo.textContent = `Login sebagai ${email}`;
+    }
+
+    async function login() {
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      if (!email || !password) {
+        setText(authStatus, "Email dan password wajib diisi.", true);
+        return;
+      }
+
+      setText(authStatus, "Mencoba login...");
+      const { error } = await state.client.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        setText(authStatus, `Login gagal: ${error.message}`, true);
+        return;
+      }
+
+      passwordInput.value = "";
+      setText(authStatus, "Login berhasil.");
+    }
+
+    async function logout() {
+      const { error } = await state.client.auth.signOut();
+      if (error) {
+        setText(dashboardStatus, `Logout gagal: ${error.message}`, true);
+        return;
+      }
+      showLoggedOutState();
+      setText(authStatus, "Berhasil logout.");
+    }
+
+    async function bootstrap() {
+      if (!hasValidConfig()) {
+        loginBtn.disabled = true;
+        return;
+      }
+
+      setupNotice.classList.add("hidden");
+      state.client = createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+
+      state.client.auth.onAuthStateChange(async (_event, session) => {
+        if (session?.user?.email) {
+          const allowed = await ensureAdmin(session.user.email);
+          if (!allowed) {
+            showLoggedOutState();
+            return;
           }
-
-          var hasAny = false;
-          for (var key in obj) {
-            if (Object.prototype.hasOwnProperty.call(obj, key) && obj[key]) {
-              hasAny = true;
-              break;
-            }
-          }
-
-          if (hasAny) {
-            dataRows.push(obj);
-          }
-        }
-
-        return { headers: h, rows: dataRows };
-      }
-
-      function saveLocal() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ headers: headers, rows: rows }));
-      }
-
-      function loadLocal() {
-        try {
-          var raw = localStorage.getItem(STORAGE_KEY);
-          if (!raw) return;
-          var parsed = JSON.parse(raw);
-          headers = Array.isArray(parsed.headers) ? parsed.headers : [];
-          rows = Array.isArray(parsed.rows) ? parsed.rows : [];
-        } catch (err) {
-          headers = [];
-          rows = [];
-        }
-      }
-
-      function pickField(item, keywords) {
-        var keys = Object.keys(item);
-        for (var i = 0; i < keys.length; i += 1) {
-          var key = keys[i].toLowerCase();
-          for (var j = 0; j < keywords.length; j += 1) {
-            if (key.indexOf(keywords[j]) !== -1) {
-              return item[keys[i]] || "";
-            }
-          }
-        }
-        return "";
-      }
-
-      function getOrderedHeaders(rawHeaders) {
-        var scored = rawHeaders.map(function (h, idx) {
-          var key = String(h || "").toLowerCase();
-          var best = preferredHeaderOrder.length + 1;
-
-          for (var i = 0; i < preferredHeaderOrder.length; i += 1) {
-            if (key.indexOf(preferredHeaderOrder[i]) !== -1) {
-              best = i;
-              break;
-            }
-          }
-
-          return { value: h, rank: best, index: idx };
-        });
-
-        scored.sort(function (a, b) {
-          if (a.rank !== b.rank) return a.rank - b.rank;
-          return a.index - b.index;
-        });
-
-        return scored.map(function (x) { return x.value; });
-      }
-
-      function updateStats() {
-        var countries = new Set();
-        var schools = new Set();
-
-        rows.forEach(function (r) {
-          var country = pickField(r, ["country", "negara"]);
-          var school = pickField(r, ["school", "sekolah", "asal"]);
-          if (country) countries.add(country.toLowerCase());
-          if (school) schools.add(school.toLowerCase());
-        });
-
-        document.getElementById("totalRows").textContent = String(rows.length);
-        document.getElementById("filteredRows").textContent = String(filtered.length);
-        document.getElementById("totalCountries").textContent = String(countries.size);
-        document.getElementById("totalSchools").textContent = String(schools.size);
-      }
-
-      function renderTable() {
-        if (!headers.length || !rows.length) {
-          thead.innerHTML = "";
-          tbody.innerHTML = "<tr><td class='muted'>Data pendaftar akan muncul di sini.</td></tr>";
-          statusText.textContent = "Belum ada data.";
-          updateStats();
-          return;
-        }
-
-        var query = searchInput.value.trim().toLowerCase();
-        filtered = rows.filter(function (r) {
-          if (!query) return true;
-          var flat = Object.values(r).join(" ").toLowerCase();
-          return flat.indexOf(query) !== -1;
-        });
-
-        var orderedHeaders = getOrderedHeaders(headers);
-
-        thead.innerHTML = "<tr>" + orderedHeaders.map(function (h) {
-          return "<th>" + h.replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</th>";
-        }).join("") + "</tr>";
-
-        if (!filtered.length) {
-          tbody.innerHTML = "<tr><td class='muted' colspan='" + headers.length + "'>Tidak ada data sesuai pencarian.</td></tr>";
+          showLoggedInState(session.user.email);
+          await loadRegistrations();
         } else {
-          tbody.innerHTML = filtered.map(function (item) {
-            var tds = orderedHeaders.map(function (h) {
-              var val = (item[h] || "").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-              return "<td>" + (val || "-") + "</td>";
-            }).join("");
-            return "<tr>" + tds + "</tr>";
-          }).join("");
+          showLoggedOutState();
         }
-
-        statusText.textContent = "Menampilkan " + filtered.length + " dari " + rows.length + " data pendaftar.";
-        updateStats();
-      }
-
-      function processCSVText(text) {
-        var matrix = parseCSV(text);
-        var normalized = normalizeMatrix(matrix);
-        headers = normalized.headers;
-        rows = normalized.rows;
-        filtered = rows.slice();
-        saveLocal();
-        renderTable();
-      }
-
-      function toCSV() {
-        if (!headers.length || !filtered.length) return "";
-
-        function esc(v) {
-          var s = String(v == null ? "" : v);
-          if (s.indexOf('"') !== -1 || s.indexOf(",") !== -1 || s.indexOf("\n") !== -1) {
-            return '"' + s.replace(/"/g, '""') + '"';
-          }
-          return s;
-        }
-
-        var lines = [];
-        lines.push(headers.map(esc).join(","));
-        filtered.forEach(function (row) {
-          lines.push(headers.map(function (h) { return esc(row[h] || ""); }).join(","));
-        });
-        return lines.join("\n");
-      }
-
-      csvFile.addEventListener("change", function (event) {
-        var file = event.target.files && event.target.files[0];
-        if (!file) return;
-
-        var reader = new FileReader();
-        reader.onload = function () {
-          processCSVText(String(reader.result || ""));
-          statusText.textContent = "File berhasil dimuat: " + file.name + ".";
-        };
-        reader.readAsText(file);
       });
 
-      searchInput.addEventListener("input", renderTable);
-
-      clearBtn.addEventListener("click", function () {
-        headers = [];
-        rows = [];
-        filtered = [];
-        localStorage.removeItem(STORAGE_KEY);
-        renderTable();
-      });
-
-      downloadBtn.addEventListener("click", function () {
-        var csv = toCSV();
-        if (!csv) {
-          statusText.textContent = "Tidak ada data untuk diunduh.";
+      const { data } = await state.client.auth.getSession();
+      if (data.session?.user?.email) {
+        const allowed = await ensureAdmin(data.session.user.email);
+        if (!allowed) {
+          showLoggedOutState();
           return;
         }
+        showLoggedInState(data.session.user.email);
+        await loadRegistrations();
+      } else {
+        showLoggedOutState();
+      }
+    }
 
-        var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement("a");
-        a.href = url;
-        a.download = "ipdcec-registrants-filtered.csv";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      });
+    loginBtn.addEventListener("click", login);
+    logoutBtn.addEventListener("click", logout);
+    refreshBtn.addEventListener("click", loadRegistrations);
+    importBtn.addEventListener("click", importCSVToDatabase);
+    downloadBtn.addEventListener("click", exportFilteredCSV);
+    searchInput.addEventListener("input", renderRows);
 
-      loadLocal();
-      filtered = rows.slice();
-      renderTable();
-    })();
+    rowsBody.addEventListener("click", (event) => {
+      const button = event.target.closest('[data-role="save"]');
+      if (!button) return;
+      saveRow(button.dataset.id);
+    });
+
+    bootstrap();
   </script>
 </body>
 </html>
