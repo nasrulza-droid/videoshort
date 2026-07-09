@@ -358,6 +358,58 @@
       font-size: 0.9rem;
     }
 
+    .notify-panel {
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #f8fbff;
+      padding: 14px;
+    }
+
+    .notify-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .notify-title {
+      font-weight: 700;
+      font-size: 0.96rem;
+      color: #2a476e;
+    }
+
+    .notify-list {
+      list-style: none;
+      margin-top: 10px;
+      display: grid;
+      gap: 8px;
+      max-height: 250px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .notify-item {
+      border: 1px solid #d8e5f7;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 0.88rem;
+      color: #2a476e;
+    }
+
+    .notify-item.new {
+      border-color: #9ec5ff;
+      background: #eef5ff;
+    }
+
+    .notify-time {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
     .help-list {
       padding-left: 18px;
       display: grid;
@@ -507,6 +559,17 @@
 
         <div class="status-line" id="dashboardStatus"></div>
 
+        <section class="notify-panel">
+          <div class="notify-head">
+            <div class="notify-title">Notifikasi Aktivitas Peserta</div>
+            <button class="btn" id="markReadBtn" type="button">Tandai Semua Sudah Dibaca</button>
+          </div>
+          <div class="status-line" id="notificationStatus">Belum ada notifikasi baru.</div>
+          <ul class="notify-list" id="notificationList">
+            <li class="notify-item">Belum ada aktivitas peserta.</li>
+          </ul>
+        </section>
+
         <div class="table-wrap">
           <table>
             <thead>
@@ -538,6 +601,13 @@
     const PLACEHOLDER_URL = "https://your-project-id.supabase.co";
     const PLACEHOLDER_KEY = "your-public-anon-key";
     const STATUS_OPTIONS = ["pending", "verified", "incomplete", "rejected"];
+    const AUTO_REFRESH_MS = 30000;
+    const ADMIN_ALLOWLIST = [
+      "asyaidatul070@gmail.com",
+      "diahsandi563@gmail.com",
+      "zhafirawirda@gmail.com",
+      "nasrulza@unimal.ac.id"
+    ];
 
     const setupNotice = document.getElementById("setupNotice");
     const authCard = document.getElementById("authCard");
@@ -555,6 +625,9 @@
     const dashboardStatus = document.getElementById("dashboardStatus");
     const sessionInfo = document.getElementById("sessionInfo");
     const rowsBody = document.getElementById("rowsBody");
+    const markReadBtn = document.getElementById("markReadBtn");
+    const notificationList = document.getElementById("notificationList");
+    const notificationStatus = document.getElementById("notificationStatus");
 
     const statTotal = document.getElementById("statTotal");
     const statCountries = document.getElementById("statCountries");
@@ -564,7 +637,11 @@
     const state = {
       rows: [],
       filteredRows: [],
-      client: null
+      client: null,
+      currentAdminEmail: "",
+      lastSeenAt: "",
+      lastNotifiedAt: "",
+      autoRefreshTimer: null
     };
 
     function setText(el, text, isError) {
@@ -578,6 +655,140 @@
         SUPABASE_CONFIG.anonKey &&
         SUPABASE_CONFIG.url !== PLACEHOLDER_URL &&
         SUPABASE_CONFIG.anonKey !== PLACEHOLDER_KEY;
+    }
+
+    function getNotificationStorageKey(email) {
+      return `ipdcec:lastSeen:${String(email || "").toLowerCase()}`;
+    }
+
+    function readLastSeen(email) {
+      const key = getNotificationStorageKey(email);
+      return localStorage.getItem(key) || "";
+    }
+
+    function writeLastSeen(email, isoTime) {
+      const key = getNotificationStorageKey(email);
+      localStorage.setItem(key, String(isoTime || ""));
+    }
+
+    function formatTime(value) {
+      const date = value ? new Date(value) : null;
+      if (!date || Number.isNaN(date.getTime())) {
+        return "Waktu tidak tersedia";
+      }
+      return date.toLocaleString("id-ID", {
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    }
+
+    function isAfter(leftIso, rightIso) {
+      if (!leftIso) return false;
+      if (!rightIso) return true;
+      const left = new Date(leftIso).getTime();
+      const right = new Date(rightIso).getTime();
+      if (Number.isNaN(left) || Number.isNaN(right)) return false;
+      return left > right;
+    }
+
+    function requestBrowserNotificationPermission() {
+      if (!("Notification" in window)) return;
+      if (Notification.permission === "default") {
+        Notification.requestPermission().catch(() => {});
+      }
+    }
+
+    function maybePushBrowserNotification(newRows) {
+      if (!("Notification" in window)) return;
+      if (Notification.permission !== "granted") return;
+      if (!newRows.length) return;
+
+      const newest = newRows[0];
+      if (!isAfter(newest.submitted_at, state.lastNotifiedAt)) {
+        return;
+      }
+
+      state.lastNotifiedAt = newest.submitted_at || "";
+      const body = `${newRows.length} pendaftaran baru masuk. Terbaru: ${newest.participant_name || "Peserta"} (${newest.team_name || "Tim"}).`;
+      const notification = new Notification("IPDCEC Admin Alert", {
+        body,
+        tag: "ipdcec-new-registration"
+      });
+      notification.onclick = () => {
+        window.focus();
+      };
+    }
+
+    function renderNotifications() {
+      if (!state.rows.length) {
+        notificationList.innerHTML = '<li class="notify-item">Belum ada aktivitas peserta.</li>';
+        setText(notificationStatus, "Belum ada notifikasi baru.");
+        return;
+      }
+
+      const sorted = [...state.rows].sort((a, b) => {
+        const timeA = new Date(a.submitted_at || 0).getTime();
+        const timeB = new Date(b.submitted_at || 0).getTime();
+        return timeB - timeA;
+      });
+
+      const latest = sorted[0]?.submitted_at || "";
+      const newRows = sorted.filter((row) => isAfter(row.submitted_at, state.lastSeenAt));
+      const visibleRows = sorted.slice(0, 12);
+
+      notificationList.innerHTML = visibleRows.map((row) => {
+        const isNew = isAfter(row.submitted_at, state.lastSeenAt);
+        const label = `${row.participant_name || "Peserta"} dari ${row.school_name || "Sekolah"} mengirim karya \"${row.work_title || "Tanpa Judul"}\".`;
+        return `
+          <li class="notify-item ${isNew ? "new" : ""}">
+            ${escapeHtml(label)}
+            <div class="notify-time">${escapeHtml(formatTime(row.submitted_at))}</div>
+          </li>
+        `;
+      }).join("");
+
+      if (newRows.length) {
+        setText(notificationStatus, `${newRows.length} notifikasi baru untuk akun ini.`);
+      } else {
+        setText(notificationStatus, "Tidak ada notifikasi baru.");
+      }
+
+      maybePushBrowserNotification(newRows);
+
+      if (!state.lastSeenAt && latest) {
+        state.lastSeenAt = latest;
+        writeLastSeen(state.currentAdminEmail, latest);
+        setText(notificationStatus, "Notifikasi awal disinkronkan. Aktivitas berikutnya akan ditandai baru.");
+      }
+    }
+
+    function markAllNotificationsAsRead() {
+      const latest = state.rows?.[0]?.submitted_at;
+      if (!latest) {
+        setText(notificationStatus, "Belum ada aktivitas untuk ditandai.");
+        return;
+      }
+
+      state.lastSeenAt = latest;
+      writeLastSeen(state.currentAdminEmail, latest);
+      renderNotifications();
+      setText(notificationStatus, "Semua notifikasi ditandai sudah dibaca.");
+    }
+
+    function stopAutoRefresh() {
+      if (!state.autoRefreshTimer) return;
+      clearInterval(state.autoRefreshTimer);
+      state.autoRefreshTimer = null;
+    }
+
+    function startAutoRefresh() {
+      stopAutoRefresh();
+      state.autoRefreshTimer = setInterval(() => {
+        loadRegistrations();
+      }, AUTO_REFRESH_MS);
     }
 
     function escapeHtml(value) {
@@ -815,6 +1026,7 @@
 
       state.rows = data || [];
       renderRows();
+      renderNotifications();
       setText(dashboardStatus, `Data termuat: ${state.rows.length} pendaftar.`);
     }
 
@@ -926,6 +1138,11 @@
     }
 
     async function ensureAdmin(email) {
+      const normalizedEmail = String(email || "").toLowerCase();
+      if (ADMIN_ALLOWLIST.includes(normalizedEmail)) {
+        return true;
+      }
+
       const { data, error } = await state.client
         .from("admin_users")
         .select("email")
@@ -947,15 +1164,23 @@
     }
 
     function showLoggedOutState() {
+      stopAutoRefresh();
+      state.currentAdminEmail = "";
+      state.lastSeenAt = "";
+      state.lastNotifiedAt = "";
       authCard.classList.remove("hidden");
       dashboardCard.classList.add("hidden");
       sessionInfo.textContent = "Belum login.";
     }
 
     function showLoggedInState(email) {
+      state.currentAdminEmail = String(email || "").toLowerCase();
+      state.lastSeenAt = readLastSeen(state.currentAdminEmail);
       authCard.classList.add("hidden");
       dashboardCard.classList.remove("hidden");
       sessionInfo.textContent = `Login sebagai ${email}`;
+      requestBrowserNotificationPermission();
+      startAutoRefresh();
     }
 
     async function login() {
@@ -1038,6 +1263,8 @@
       if (!button) return;
       saveRow(button.dataset.id);
     });
+
+    markReadBtn.addEventListener("click", markAllNotificationsAsRead);
 
     bootstrap();
   </script>

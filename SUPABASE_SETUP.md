@@ -124,12 +124,19 @@ Tambahkan email admin yang boleh membuka dashboard:
 ```sql
 insert into public.admin_users (email)
 values
-  ('admin@ipdcec.online'),
-  ('your-real-admin@example.com')
+  ('asyaidatul070@gmail.com'),
+  ('diahsandi563@gmail.com'),
+  ('zhafirawirda@gmail.com'),
+  ('nasrulza@unimal.ac.id')
 on conflict (email) do nothing;
 ```
 
 Pastikan email di tabel `admin_users` sama dengan email user di Supabase Authentication.
+
+Catatan penting:
+
+- Jika mode konfirmasi email aktif di Supabase Auth, user baru wajib klik link verifikasi email sebelum bisa login penuh.
+- Untuk aktivasi cepat oleh panitia, konfirmasi email juga bisa dilakukan manual dari menu Authentication > Users.
 
 ## 5. Public Registration Form
 
