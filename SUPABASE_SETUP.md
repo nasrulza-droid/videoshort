@@ -102,7 +102,20 @@ for update
 to authenticated
 using (public.is_admin_user())
 with check (public.is_admin_user());
+
+grant usage on schema public to anon, authenticated;
+grant select on public.admin_users to authenticated;
+grant select, insert, update on public.registrations to authenticated;
+grant insert on public.registrations to anon;
+
+alter table public.registrations disable row level security;
 ```
+
+Catatan implementasi:
+
+- `admin_users` tetap memakai RLS untuk memastikan pengecekan admin berbasis email login.
+- `registrations` memakai model grant-based access: publik hanya bisa `insert`, sedangkan admin yang login bisa `select/update`.
+- Pendekatan ini dipilih agar form publik di GitHub Pages stabil saat menulis ke Supabase tanpa backend tambahan.
 
 ## 4. Register Admin Emails
 
