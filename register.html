@@ -92,7 +92,15 @@
     .field input, .field textarea, .field select {
       width: 100%; border: 1px solid var(--line); border-radius: 12px; padding: 11px 12px; background: var(--surface-soft);
     }
+    .field input:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
     .field textarea { min-height: 100px; resize: vertical; }
+    .field-hint {
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
     .checkbox-row { display: flex; gap: 10px; align-items: start; font-size: 0.92rem; color: var(--muted); }
     .status-line { min-height: 24px; margin-top: 10px; color: var(--muted); }
     .list { padding-left: 18px; display: grid; gap: 8px; color: var(--muted); font-size: 0.93rem; }
@@ -100,6 +108,15 @@
     .success-box {
       margin-top: 14px; padding: 14px 16px; border-radius: 14px;
       background: #eefbf5; border: 1px solid #bfe9d0; color: #196a4a;
+    }
+    .entry-preview {
+      margin-top: 8px;
+      padding: 12px 14px;
+      border: 1px dashed #bfd1ea;
+      border-radius: 14px;
+      background: #f5f9ff;
+      color: #2a476e;
+      font-size: 0.9rem;
     }
 
     @media (max-width: 960px) {
@@ -226,6 +243,7 @@
           <div class="field">
             <label for="aiTools">Jenis AI yang digunakan (jika ada)</label>
             <input id="aiTools" name="ai_tools" placeholder="Contoh: ChatGPT, Canva AI, Midjourney" />
+            <span class="field-hint">Kolom ini otomatis nonaktif jika kamu memilih tidak menggunakan AI.</span>
           </div>
 
           <div class="grid-2">
@@ -264,6 +282,10 @@
           <div class="field">
             <label for="notes">Catatan Tambahan</label>
             <textarea id="notes" name="notes" placeholder="Opsional"></textarea>
+          </div>
+
+          <div class="entry-preview" id="entryPreview">
+            Kode entry akan dibuat otomatis dari email, nama tim, dan judul karya setelah tiga kolom itu terisi.
           </div>
 
           <div class="checkbox-row">
@@ -311,6 +333,12 @@
     const formStatus = document.getElementById("formStatus");
     const successBox = document.getElementById("successBox");
     const setupNotice = document.getElementById("setupNotice");
+    const aiUsedSelect = document.getElementById("aiUsed");
+    const aiToolsInput = document.getElementById("aiTools");
+    const entryPreview = document.getElementById("entryPreview");
+    const previewFields = ["email", "teamName", "workTitle"]
+      .map((id) => document.getElementById(id))
+      .filter(Boolean);
 
     function setStatus(text, isError) {
       formStatus.textContent = text;
@@ -337,12 +365,39 @@
         .join("-");
     }
 
+    function updateEntryPreview() {
+      const previewPayload = {
+        email: document.getElementById("email").value,
+        team_name: document.getElementById("teamName").value,
+        work_title: document.getElementById("workTitle").value
+      };
+      const previewKey = buildEntryKey(previewPayload);
+      entryPreview.innerHTML = previewKey
+        ? `Preview kode entry: <strong>${previewKey}</strong>`
+        : "Kode entry akan dibuat otomatis dari email, nama tim, dan judul karya setelah tiga kolom itu terisi.";
+    }
+
+    function syncAiToolsState() {
+      const usesAi = aiUsedSelect.value === "Yes";
+      aiToolsInput.disabled = !usesAi;
+      if (!usesAi) {
+        aiToolsInput.value = "";
+      }
+    }
+
     const supabase = hasValidConfig() ? createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey) : null;
     if (!supabase) {
       submitBtn.disabled = true;
     } else {
       setupNotice.style.display = "none";
     }
+
+    previewFields.forEach((field) => {
+      field.addEventListener("input", updateEntryPreview);
+    });
+    aiUsedSelect.addEventListener("change", syncAiToolsState);
+    syncAiToolsState();
+    updateEntryPreview();
 
     form.addEventListener("submit", async function (event) {
       event.preventDefault();
@@ -389,6 +444,8 @@
       }
 
       form.reset();
+      syncAiToolsState();
+      updateEntryPreview();
       setStatus("Pendaftaran berhasil dikirim.");
       successBox.style.display = "block";
       successBox.innerHTML = `Pendaftaran berhasil. Kode entry kamu: <strong>${entryKey || "generated-entry"}</strong>. Simpan kode ini untuk komunikasi dengan panitia.`;

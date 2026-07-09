@@ -348,6 +348,16 @@
       font-size: 0.9rem;
     }
 
+    .soft-note {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid #d8e5f7;
+      background: #f6faff;
+      color: #456384;
+      font-size: 0.9rem;
+    }
+
     .help-list {
       padding-left: 18px;
       display: grid;
@@ -434,6 +444,7 @@
             <button class="btn btn-primary" id="loginBtn" type="button">Login</button>
           </div>
           <div class="status-line" id="authStatus"></div>
+          <div class="soft-note">Jika perlu reset password, gunakan menu Supabase Authentication agar akses admin tetap terpusat dan terdokumentasi.</div>
           <div class="meta">
             <span>Model ini cocok untuk GitHub Pages karena frontend tetap statis.</span>
             <span>Hak akses admin dikontrol lewat Supabase Auth, bukan link publik semata.</span>
@@ -491,7 +502,7 @@
 
         <div class="field search-box">
           <label for="searchInput">Cari nama, sekolah, negara, email, judul karya</label>
-          <input id="searchInput" type="text" placeholder="Contoh: Indonesia, SMA, eco team" />
+          <input id="searchInput" type="search" placeholder="Contoh: Indonesia, SMA, eco team" />
         </div>
 
         <div class="status-line" id="dashboardStatus"></div>
@@ -737,7 +748,7 @@
       renderStats(state.filteredRows);
 
       if (!state.filteredRows.length) {
-        rowsBody.innerHTML = '<tr><td colspan="7" class="muted">Tidak ada data yang cocok.</td></tr>';
+        rowsBody.innerHTML = `<tr><td colspan="7" class="muted">${query ? "Tidak ada data yang cocok." : "Belum ada pendaftaran masuk."}</td></tr>`;
         return;
       }
 

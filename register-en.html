@@ -61,12 +61,15 @@
     .field { display: grid; gap: 7px; margin-bottom: 12px; }
     .field label { font-size: 0.9rem; font-weight: 700; }
     .field input, .field textarea, .field select { width: 100%; border: 1px solid var(--line); border-radius: 12px; padding: 11px 12px; background: var(--surface-soft); }
+    .field input:disabled { opacity: 0.7; cursor: not-allowed; }
     .field textarea { min-height: 100px; resize: vertical; }
+    .field-hint { color: var(--muted); font-size: 0.84rem; }
     .checkbox-row { display: flex; gap: 10px; align-items: start; font-size: 0.92rem; color: var(--muted); }
     .status-line { min-height: 24px; margin-top: 10px; color: var(--muted); }
     .list { padding-left: 18px; display: grid; gap: 8px; color: var(--muted); font-size: 0.93rem; }
     code { font-family: Consolas, monospace; background: #edf3ff; padding: 2px 6px; border-radius: 8px; }
     .success-box { margin-top: 14px; padding: 14px 16px; border-radius: 14px; background: #eefbf5; border: 1px solid #bfe9d0; color: #196a4a; }
+    .entry-preview { margin-top: 8px; padding: 12px 14px; border: 1px dashed #bfd1ea; border-radius: 14px; background: #f5f9ff; color: #2a476e; font-size: 0.9rem; }
     @media (max-width: 960px) { .layout, .grid-2 { grid-template-columns: 1fr; } }
     @media (max-width: 640px) { .btn, .actions { width: 100%; } .actions .btn { width: 100%; } }
   </style>
@@ -180,6 +183,7 @@
           <div class="field">
             <label for="aiTools">AI Tools Used (if any)</label>
             <input id="aiTools" name="ai_tools" placeholder="Example: ChatGPT, Canva AI, Midjourney" />
+            <span class="field-hint">This field is automatically disabled when you select that no AI was used.</span>
           </div>
           <div class="grid-2">
             <div class="field">
@@ -214,6 +218,9 @@
           <div class="field">
             <label for="notes">Additional Notes</label>
             <textarea id="notes" name="notes" placeholder="Optional"></textarea>
+          </div>
+          <div class="entry-preview" id="entryPreview">
+            Your entry code will be generated automatically from the email, team name, and work title once those fields are filled.
           </div>
           <div class="checkbox-row">
             <input id="consent" name="consent" type="checkbox" required />
@@ -257,6 +264,12 @@
     const formStatus = document.getElementById("formStatus");
     const successBox = document.getElementById("successBox");
     const setupNotice = document.getElementById("setupNotice");
+    const aiUsedSelect = document.getElementById("aiUsed");
+    const aiToolsInput = document.getElementById("aiTools");
+    const entryPreview = document.getElementById("entryPreview");
+    const previewFields = ["email", "teamName", "workTitle"]
+      .map((id) => document.getElementById(id))
+      .filter(Boolean);
 
     function setStatus(text, isError) {
       formStatus.textContent = text;
@@ -283,12 +296,39 @@
         .join("-");
     }
 
+    function updateEntryPreview() {
+      const previewPayload = {
+        email: document.getElementById("email").value,
+        team_name: document.getElementById("teamName").value,
+        work_title: document.getElementById("workTitle").value
+      };
+      const previewKey = buildEntryKey(previewPayload);
+      entryPreview.innerHTML = previewKey
+        ? `Entry code preview: <strong>${previewKey}</strong>`
+        : "Your entry code will be generated automatically from the email, team name, and work title once those fields are filled.";
+    }
+
+    function syncAiToolsState() {
+      const usesAi = aiUsedSelect.value === "Yes";
+      aiToolsInput.disabled = !usesAi;
+      if (!usesAi) {
+        aiToolsInput.value = "";
+      }
+    }
+
     const supabase = hasValidConfig() ? createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey) : null;
     if (!supabase) {
       submitBtn.disabled = true;
     } else {
       setupNotice.style.display = "none";
     }
+
+    previewFields.forEach((field) => {
+      field.addEventListener("input", updateEntryPreview);
+    });
+    aiUsedSelect.addEventListener("change", syncAiToolsState);
+    syncAiToolsState();
+    updateEntryPreview();
 
     form.addEventListener("submit", async function (event) {
       event.preventDefault();
@@ -334,6 +374,8 @@
       }
 
       form.reset();
+      syncAiToolsState();
+      updateEntryPreview();
       setStatus("Registration submitted successfully.");
       successBox.style.display = "block";
       successBox.innerHTML = `Registration successful. Your entry code is <strong>${entryKey || "generated-entry"}</strong>. Keep this code for communication with the committee.`;
