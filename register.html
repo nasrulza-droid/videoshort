@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pendaftaran Internal - IPDCEC 2026</title>
+  <meta name="description" content="Form pendaftaran internal IPDCEC 2026 yang langsung terhubung ke database Supabase." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f8f6f1;
+      --surface: #fffdf8;
+      --surface-soft: #f7fbff;
+      --ink: #152238;
+      --muted: #4f5d73;
+      --line: #d8deea;
+      --brand: #ff6b35;
+      --brand-deep: #e6521a;
+      --accent: #00a6a6;
+      --accent-soft: #dbf5f3;
+      --shadow: 0 18px 42px rgba(21, 34, 56, 0.12);
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+      --maxw: 1140px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Manrope", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 8%, rgba(255, 107, 53, 0.18), transparent 36%),
+        radial-gradient(circle at 88% 12%, rgba(0, 166, 166, 0.18), transparent 34%),
+        linear-gradient(135deg, #f9f7f2 0%, #f3faf8 100%);
+      min-height: 100vh;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    .container { width: min(var(--maxw), 94vw); margin: 0 auto; }
+
+    .topbar {
+      padding: 18px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; }
+    .brand-mark {
+      width: 34px; height: 34px; border-radius: 10px;
+      background: linear-gradient(145deg, var(--brand), #ffa12b);
+      box-shadow: 0 8px 18px rgba(255, 107, 53, 0.3);
+    }
+
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn, input, textarea, select, button { font: inherit; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      border: 1px solid var(--line); border-radius: 999px; padding: 11px 16px;
+      background: var(--surface); font-weight: 700; cursor: pointer;
+    }
+    .btn-primary { background: linear-gradient(120deg, var(--brand) 0%, #ff8d28 100%); color: white; border-color: transparent; }
+
+    .hero, .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+    }
+
+    .hero { padding: 24px; margin-bottom: 16px; }
+    h1, h2 { font-family: "DM Serif Display", serif; font-weight: 400; line-height: 1.1; }
+    h1 { font-size: clamp(1.9rem, 3.2vw, 2.8rem); margin-bottom: 10px; }
+    .hero p { color: var(--muted); max-width: 72ch; }
+    .notice {
+      margin-top: 14px; padding: 14px 16px; border-radius: 14px;
+      background: #fff6ee; border: 1px solid #ffd9bc; color: #8a4719;
+    }
+
+    .layout { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 16px; padding-bottom: 28px; }
+    .card { padding: 18px; }
+    .card h2 { font-size: 1.15rem; margin-bottom: 10px; }
+    .muted { color: var(--muted); font-size: 0.93rem; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .field { display: grid; gap: 7px; margin-bottom: 12px; }
+    .field label { font-size: 0.9rem; font-weight: 700; }
+    .field input, .field textarea, .field select {
+      width: 100%; border: 1px solid var(--line); border-radius: 12px; padding: 11px 12px; background: var(--surface-soft);
+    }
+    .field textarea { min-height: 100px; resize: vertical; }
+    .checkbox-row { display: flex; gap: 10px; align-items: start; font-size: 0.92rem; color: var(--muted); }
+    .status-line { min-height: 24px; margin-top: 10px; color: var(--muted); }
+    .list { padding-left: 18px; display: grid; gap: 8px; color: var(--muted); font-size: 0.93rem; }
+    code { font-family: Consolas, monospace; background: #edf3ff; padding: 2px 6px; border-radius: 8px; }
+    .success-box {
+      margin-top: 14px; padding: 14px 16px; border-radius: 14px;
+      background: #eefbf5; border: 1px solid #bfe9d0; color: #196a4a;
+    }
+
+    @media (max-width: 960px) {
+      .layout, .grid-2 { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .btn, .actions { width: 100%; }
+      .actions .btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="topbar">
+      <a class="brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>IPDCEC 2026 Short Video</span>
+      </a>
+      <div class="actions">
+        <a class="btn" href="index.html">Kembali ke Landing Page</a>
+        <a class="btn" href="register-en.html">English Form</a>
+      </div>
+    </header>
+
+    <section class="hero">
+      <h1>Pendaftaran Internal IPDCEC 2026</h1>
+      <p>
+        Form ini mengirim data langsung ke database Supabase. Jika konfigurasi Supabase belum aktif,
+        kamu masih bisa memakai Google Form lama sebagai fallback.
+      </p>
+      <div class="notice" id="setupNotice">
+        Konfigurasi Supabase belum aktif. Isi file <code>supabase-config.js</code> terlebih dahulu. Sementara itu,
+        gunakan Google Form resmi sebagai fallback.
+      </div>
+    </section>
+
+    <main class="layout">
+      <section class="card">
+        <h2>Isi Form Pendaftaran</h2>
+        <p class="muted">Siapkan link publik untuk video, bukti pelajar, twibbon, poster, dan bukti pembayaran.</p>
+        <form id="registrationForm" style="margin-top: 14px;">
+          <div class="grid-2">
+            <div class="field">
+              <label for="teamName">Nama Tim</label>
+              <input id="teamName" name="team_name" required />
+            </div>
+            <div class="field">
+              <label for="participantName">Ketua Tim / Peserta Utama</label>
+              <input id="participantName" name="participant_name" required />
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label for="memberNames">Anggota Lain (opsional)</label>
+              <textarea id="memberNames" name="member_names" placeholder="Pisahkan dengan koma atau baris baru"></textarea>
+            </div>
+            <div class="field">
+              <label for="schoolName">Asal Sekolah</label>
+              <input id="schoolName" name="school_name" required />
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label for="country">Negara</label>
+              <input id="country" name="country" required />
+            </div>
+            <div class="field">
+              <label for="email">Email Aktif</label>
+              <input id="email" name="email" type="email" required />
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label for="phone">WhatsApp / Nomor Aktif</label>
+              <input id="phone" name="phone" required />
+            </div>
+            <div class="field">
+              <label for="instagram">Username Instagram</label>
+              <input id="instagram" name="instagram" placeholder="@namakamu" required />
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label for="workTitle">Judul Karya</label>
+              <input id="workTitle" name="work_title" required />
+            </div>
+            <div class="field">
+              <label for="subtheme">Subtema</label>
+              <select id="subtheme" name="subtheme" required>
+                <option value="">Pilih subtema</option>
+                <option>Renewable Energy</option>
+                <option>Waste Management</option>
+                <option>Green Technology</option>
+                <option>Sustainable Industry</option>
+                <option>Climate Change and Its Solutions</option>
+                <option>Circular Economy</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label for="languageUsed">Bahasa Video</label>
+              <select id="languageUsed" name="language_used" required>
+                <option value="">Pilih bahasa</option>
+                <option>Bahasa Indonesia</option>
+                <option>English</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="aiUsed">Menggunakan AI?</label>
+              <select id="aiUsed" name="ai_used" required>
+                <option value="">Pilih opsi</option>
+                <option value="Yes">Ya</option>
+                <option value="No">Tidak</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="aiTools">Jenis AI yang digunakan (jika ada)</label>
+            <input id="aiTools" name="ai_tools" placeholder="Contoh: ChatGPT, Canva AI, Midjourney" />
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label for="instagramPostUrl">Link Post/Reels Instagram</label>
+              <input id="instagramPostUrl" name="instagram_post_url" type="url" required />
+            </div>
+            <div class="field">
+              <label for="videoUrl">Link Video / Folder Drive</label>
+              <input id="videoUrl" name="video_url" type="url" required />
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label for="studentProofUrl">Link Kartu Pelajar / Surat Aktif</label>
+              <input id="studentProofUrl" name="student_proof_url" type="url" required />
+            </div>
+            <div class="field">
+              <label for="paymentProofUrl">Link Bukti Pembayaran</label>
+              <input id="paymentProofUrl" name="payment_proof_url" type="url" required />
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label for="twibbonProofUrl">Link Bukti Upload Twibbon</label>
+              <input id="twibbonProofUrl" name="twibbon_proof_url" type="url" required />
+            </div>
+            <div class="field">
+              <label for="posterProofUrl">Link Bukti Upload Poster</label>
+              <input id="posterProofUrl" name="poster_proof_url" type="url" required />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="notes">Catatan Tambahan</label>
+            <textarea id="notes" name="notes" placeholder="Opsional"></textarea>
+          </div>
+
+          <div class="checkbox-row">
+            <input id="consent" name="consent" type="checkbox" required />
+            <label for="consent">Saya menyatakan seluruh data benar, akun Instagram akan tetap publik saat penilaian, dan seluruh link berkas dapat diakses panitia.</label>
+          </div>
+
+          <div class="actions" style="margin-top: 16px;">
+            <button class="btn btn-primary" id="submitBtn" type="submit">Kirim Pendaftaran</button>
+            <a class="btn" href="https://forms.gle/R4UENDGfwAQR569k8" target="_blank" rel="noopener noreferrer">Pakai Google Form Lama</a>
+          </div>
+          <div class="status-line" id="formStatus"></div>
+          <div class="success-box" id="successBox" style="display:none;"></div>
+        </form>
+      </section>
+
+      <aside class="card">
+        <h2>Checklist Sebelum Submit</h2>
+        <ul class="list">
+          <li>Video sudah sesuai durasi 1-3 menit, format mp4, dan landscape.</li>
+          <li>Logo IPDCEC dan logo sekolah sudah ada di pojok kanan atas sepanjang video.</li>
+          <li>Link Google Drive/file sudah publik dan bisa diakses tanpa request permission.</li>
+          <li>Caption Instagram sudah memuat judul, nama tim, sekolah, dan hashtag resmi.</li>
+          <li>Jika memakai AI, jenis AI sudah dicantumkan di video atau deskripsi.</li>
+        </ul>
+
+        <h2 style="margin-top:16px;">Catatan Teknis</h2>
+        <ul class="list">
+          <li>Jika Supabase belum aktif, tombol submit akan dinonaktifkan dan fallback Google Form tetap bisa dipakai.</li>
+          <li>Setelah submit berhasil, peserta menerima kode entry untuk memudahkan pelacakan oleh panitia.</li>
+          <li>Form ini menyimpan detail tambahan di <code>raw_data</code> agar admin tetap bisa membaca semua berkas dari dashboard.</li>
+        </ul>
+      </aside>
+    </main>
+  </div>
+
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+    import { SUPABASE_CONFIG } from "./supabase-config.js";
+
+    const PLACEHOLDER_URL = "https://your-project-id.supabase.co";
+    const PLACEHOLDER_KEY = "your-public-anon-key";
+    const form = document.getElementById("registrationForm");
+    const submitBtn = document.getElementById("submitBtn");
+    const formStatus = document.getElementById("formStatus");
+    const successBox = document.getElementById("successBox");
+    const setupNotice = document.getElementById("setupNotice");
+
+    function setStatus(text, isError) {
+      formStatus.textContent = text;
+      formStatus.style.color = isError ? "#c43737" : "var(--muted)";
+    }
+
+    function hasValidConfig() {
+      return SUPABASE_CONFIG && SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey &&
+        SUPABASE_CONFIG.url !== PLACEHOLDER_URL && SUPABASE_CONFIG.anonKey !== PLACEHOLDER_KEY;
+    }
+
+    function slugify(value) {
+      return String(value || "")
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+    }
+
+    function buildEntryKey(data) {
+      return [data.email, data.team_name, data.work_title]
+        .map(slugify)
+        .filter(Boolean)
+        .join("-");
+    }
+
+    const supabase = hasValidConfig() ? createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey) : null;
+    if (!supabase) {
+      submitBtn.disabled = true;
+    } else {
+      setupNotice.style.display = "none";
+    }
+
+    form.addEventListener("submit", async function (event) {
+      event.preventDefault();
+      successBox.style.display = "none";
+
+      if (!supabase) {
+        setStatus("Supabase belum dikonfigurasi. Gunakan Google Form lama sementara waktu.", true);
+        return;
+      }
+
+      const formData = new FormData(form);
+      const payload = Object.fromEntries(formData.entries());
+      const entryKey = buildEntryKey(payload);
+
+      const row = {
+        entry_key: entryKey,
+        submitted_at: new Date().toISOString(),
+        team_name: payload.team_name,
+        participant_name: payload.participant_name,
+        school_name: payload.school_name,
+        country: payload.country,
+        email: payload.email,
+        phone: payload.phone,
+        instagram: payload.instagram,
+        work_title: payload.work_title,
+        verification_status: "pending",
+        admin_notes: "",
+        raw_data: payload
+      };
+
+      submitBtn.disabled = true;
+      setStatus("Mengirim data pendaftaran...");
+
+      const { error } = await supabase.from("registrations").insert(row);
+      submitBtn.disabled = false;
+
+      if (error) {
+        if (String(error.message || "").toLowerCase().includes("duplicate") || String(error.message || "").toLowerCase().includes("unique")) {
+          setStatus("Data dengan kombinasi email, nama tim, dan judul karya ini tampaknya sudah pernah dikirim.", true);
+        } else {
+          setStatus(`Pendaftaran gagal: ${error.message}`, true);
+        }
+        return;
+      }
+
+      form.reset();
+      setStatus("Pendaftaran berhasil dikirim.");
+      successBox.style.display = "block";
+      successBox.innerHTML = `Pendaftaran berhasil. Kode entry kamu: <strong>${entryKey || "generated-entry"}</strong>. Simpan kode ini untuk komunikasi dengan panitia.`;
+    });
+  </script>
+</body>
+</html>

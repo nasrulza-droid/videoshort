@@ -8,6 +8,9 @@ Halaman [admin.html](admin.html) memakai Supabase Auth + PostgreSQL.
 2. Buka Authentication > Providers.
 3. Aktifkan Email provider.
 4. Buat minimal satu user admin di Authentication > Users.
+5. Catat `Project URL` dan `anon public key` dari Project Settings > API.
+
+Catatan: project Supabase tidak bisa dibuat otomatis dari repo GitHub Pages ini tanpa login akun Supabase milikmu. Yang bisa saya siapkan dari sisi kode adalah seluruh struktur frontend, SQL schema, dan file konfigurasi agar setelah project dibuat kamu tinggal mengisi kredensialnya.
 
 ## 2. Fill Frontend Config
 
@@ -87,6 +90,12 @@ for insert
 to authenticated
 with check (public.is_admin_user());
 
+create policy "registrations_insert_public"
+on public.registrations
+for insert
+to anon
+with check (true);
+
 create policy "registrations_update_admin"
 on public.registrations
 for update
@@ -109,15 +118,24 @@ on conflict (email) do nothing;
 
 Pastikan email di tabel `admin_users` sama dengan email user di Supabase Authentication.
 
-## 5. Daily Workflow
+## 5. Public Registration Form
 
-1. Buka Google Form responses.
-2. Export ke CSV.
-3. Login ke [admin.html](admin.html).
-4. Upload CSV lewat tombol `Impor CSV ke Database`.
+Setelah `supabase-config.js` diisi, halaman berikut akan langsung submit ke database:
+
+- [register.html](register.html)
+- [register-en.html](register-en.html)
+
+Google Form lama bisa tetap dipakai sebagai fallback sementara, tetapi jalur utama pendaftaran sekarang bisa diarahkan ke form internal ini.
+
+## 6. Daily Workflow
+
+1. Peserta daftar lewat [register.html](register.html) atau [register-en.html](register-en.html).
+2. Data langsung masuk ke tabel `registrations`.
+3. Login ke [admin.html](admin.html) untuk review, verifikasi, dan catatan admin.
+4. Gunakan impor CSV hanya untuk migrasi data lama dari Google Form bila diperlukan.
 5. Review status pendaftar dan simpan catatan admin.
 
-## 6. Important Notes
+## 7. Important Notes
 
 - Karena situs ini di GitHub Pages, backend dijalankan oleh Supabase, bukan server di repo.
 - `anonKey` aman dipakai di frontend, tapi policy RLS wajib aktif.
