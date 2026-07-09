@@ -360,6 +360,26 @@
       };
 
       submitBtn.disabled = true;
+      setStatus("Checking duplicate entry...");
+
+      const { data: existingRow, error: duplicateCheckError } = await supabase
+        .from("registrations")
+        .select("id")
+        .eq("entry_key", entryKey)
+        .maybeSingle();
+
+      if (duplicateCheckError) {
+        submitBtn.disabled = false;
+        setStatus(`Failed to check duplicate entry: ${duplicateCheckError.message}`, true);
+        return;
+      }
+
+      if (existingRow) {
+        submitBtn.disabled = false;
+        setStatus("A submission with this email, team name, and work title is already registered.", true);
+        return;
+      }
+
       setStatus("Submitting registration...");
       const { error } = await supabase.from("registrations").insert(row);
       submitBtn.disabled = false;

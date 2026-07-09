@@ -429,6 +429,26 @@
       };
 
       submitBtn.disabled = true;
+      setStatus("Memeriksa duplikasi data...");
+
+      const { data: existingRow, error: duplicateCheckError } = await supabase
+        .from("registrations")
+        .select("id")
+        .eq("entry_key", entryKey)
+        .maybeSingle();
+
+      if (duplicateCheckError) {
+        submitBtn.disabled = false;
+        setStatus(`Gagal memeriksa duplikasi: ${duplicateCheckError.message}`, true);
+        return;
+      }
+
+      if (existingRow) {
+        submitBtn.disabled = false;
+        setStatus("Data dengan kombinasi email, nama tim, dan judul karya ini sudah terdaftar.", true);
+        return;
+      }
+
       setStatus("Mengirim data pendaftaran...");
 
       const { error } = await supabase.from("registrations").insert(row);

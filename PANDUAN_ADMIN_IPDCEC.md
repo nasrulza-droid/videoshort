@@ -5,7 +5,7 @@
 - Landing page: https://videoshort.ipdcec.online/index.html
 - Form peserta (ID): https://videoshort.ipdcec.online/register.html
 - Form peserta (EN): https://videoshort.ipdcec.online/register-en.html
-- Dashboard admin: https://videoshort.ipdcec.online/admin.html
+- Dashboard admin: https://videoshort.ipdcec.online/panel-panitia-2026.html
 
 ## 2) Akun Admin (4 Orang)
 
@@ -91,6 +91,32 @@ Solusi:
 1. Buka Supabase Authentication > Users.
 2. Set user menjadi confirmed.
 3. Coba login ulang.
+
+Masalah: Login gagal dengan pesan Akun belum aktif atau belum tersedia
+
+Solusi:
+
+1. Buka Supabase Authentication > Users.
+2. Pastikan user benar-benar ada. Jika belum ada, buat user manual dengan email admin terkait.
+3. Set Email Confirmed = true.
+4. Set password sementara baru (contoh: IPDCECAdmin@2026!Team), lalu minta admin login ulang.
+
+Masalah: Login gagal Invalid login credentials
+
+Solusi:
+
+1. Klik tombol Kirim Link Reset Password di halaman admin, atau reset manual dari Supabase Dashboard.
+2. Pastikan admin memakai password terbaru, bukan password lama.
+3. Setelah reset berhasil, login ulang.
+
+Masalah: Supabase mengembalikan error 500 atau unexpected_failure saat login/sign up
+
+Solusi:
+
+1. Catat error_id dari respons Supabase (jika ada).
+2. Cek status Supabase project dan Auth service (dashboard service health).
+3. Buat ulang user secara manual di Authentication > Users.
+4. Jika tetap gagal, laporkan ke Supabase support dengan menyertakan error_id untuk investigasi database Auth.
 
 Masalah: Admin berhasil login tetapi data tidak muncul
 

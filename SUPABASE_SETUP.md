@@ -1,6 +1,6 @@
 # Supabase Setup for IPDCEC 2026 Admin
 
-Halaman [admin.html](admin.html) memakai Supabase Auth + PostgreSQL.
+Halaman [panel-panitia-2026.html](panel-panitia-2026.html) memakai Supabase Auth + PostgreSQL.
 
 ## 1. Create Project
 
@@ -107,14 +107,12 @@ grant usage on schema public to anon, authenticated;
 grant select on public.admin_users to authenticated;
 grant select, insert, update on public.registrations to authenticated;
 grant insert on public.registrations to anon;
-
-alter table public.registrations disable row level security;
 ```
 
 Catatan implementasi:
 
 - `admin_users` tetap memakai RLS untuk memastikan pengecekan admin berbasis email login.
-- `registrations` memakai model grant-based access: publik hanya bisa `insert`, sedangkan admin yang login bisa `select/update`.
+- `registrations` memakai RLS + policy: publik hanya bisa `insert`, sedangkan admin yang login bisa `select/update`.
 - Pendekatan ini dipilih agar form publik di GitHub Pages stabil saat menulis ke Supabase tanpa backend tambahan.
 
 ## 4. Register Admin Emails
@@ -151,7 +149,7 @@ Google Form lama bisa tetap dipakai sebagai fallback sementara, tetapi jalur uta
 
 1. Peserta daftar lewat [register.html](register.html) atau [register-en.html](register-en.html).
 2. Data langsung masuk ke tabel `registrations`.
-3. Login ke [admin.html](admin.html) untuk review, verifikasi, dan catatan admin.
+3. Login ke [panel-panitia-2026.html](panel-panitia-2026.html) untuk review, verifikasi, dan catatan admin.
 4. Gunakan impor CSV hanya untuk migrasi data lama dari Google Form bila diperlukan.
 5. Review status pendaftar dan simpan catatan admin.
 

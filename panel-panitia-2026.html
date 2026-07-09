@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Login - IPDCEC 2026</title>
+  <meta
+    name="description"
+    content="Halaman admin IPDCEC 2026 dengan login dan database Supabase untuk mengelola data pendaftar."
+  />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f4f8ff;
+      --surface: #ffffff;
+      --surface-soft: #f8fbff;
+      --ink: #13223d;
+      --muted: #5b6b86;
+      --line: #d5dff0;
+      --brand: #1768ff;
+      --brand-dark: #0d4fc9;
+      --accent: #0f8a5f;
+      --warn: #c75b12;
+      --danger: #c43737;
+      --shadow: 0 16px 38px rgba(19, 34, 61, 0.1);
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+      --maxw: 1180px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Space Grotesk", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 92% 9%, rgba(23, 104, 255, 0.12), transparent 32%),
+        radial-gradient(circle at 10% 95%, rgba(15, 138, 95, 0.12), transparent 32%),
+        linear-gradient(180deg, #f7faff 0%, #edf5ff 100%);
+      min-height: 100vh;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: min(var(--maxw), 94vw);
+      margin: 0 auto;
+    }
+
+    .topbar {
+      padding: 18px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.02rem;
+    }
+
+    .brand-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: var(--brand);
+      box-shadow: 0 0 0 6px rgba(23, 104, 255, 0.15);
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .btn,
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 11px 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--brand);
+      border-color: var(--brand);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--brand-dark);
+      border-color: var(--brand-dark);
+    }
+
+    .btn-danger {
+      background: #fff2f2;
+      border-color: #f3c7c7;
+      color: var(--danger);
+    }
+
+    .hero,
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 {
+      font-size: clamp(1.5rem, 2.8vw, 2rem);
+      margin-bottom: 8px;
+    }
+
+    .hero p {
+      color: var(--muted);
+      max-width: 74ch;
+    }
+
+    .notice {
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 1px solid #ffd9bc;
+      background: #fff6ee;
+      color: #8a4719;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 16px;
+      padding-bottom: 28px;
+    }
+
+    .card {
+      padding: 18px;
+    }
+
+    .card h2 {
+      font-size: 1.02rem;
+      margin-bottom: 10px;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 0.93rem;
+    }
+
+    .stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .field label {
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .field input,
+    .field textarea,
+    .field select {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--surface-soft);
+      border-radius: 12px;
+      padding: 11px 12px;
+      color: var(--ink);
+    }
+
+    .field textarea {
+      min-height: 92px;
+      resize: vertical;
+    }
+
+    .meta {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .stat {
+      background: #fbfdff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 0.86rem;
+      display: block;
+    }
+
+    .stat strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 1.4rem;
+    }
+
+    .inline-tools {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .search-box {
+      margin-top: 14px;
+    }
+
+    .table-wrap {
+      margin-top: 14px;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--surface);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1120px;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid #e8eef8;
+      padding: 12px;
+      text-align: left;
+      vertical-align: top;
+      font-size: 0.9rem;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: #f5f8ff;
+      color: #35557f;
+      text-transform: uppercase;
+      letter-spacing: 0.35px;
+      font-size: 0.8rem;
+      z-index: 1;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      border: 1px solid var(--line);
+      background: #f6f9ff;
+      color: #35557f;
+    }
+
+    .pill.pending {
+      background: #fff6ee;
+      border-color: #ffd9bc;
+      color: #8a4719;
+    }
+
+    .pill.verified {
+      background: #eefbf5;
+      border-color: #bfe9d0;
+      color: #196a4a;
+    }
+
+    .pill.incomplete {
+      background: #fff7e7;
+      border-color: #f5deb1;
+      color: #8a6516;
+    }
+
+    .pill.rejected {
+      background: #fff0f0;
+      border-color: #efc0c0;
+      color: #9a2626;
+    }
+
+    .row-actions {
+      display: grid;
+      gap: 8px;
+      min-width: 180px;
+    }
+
+    .small {
+      font-size: 0.84rem;
+    }
+
+    .status-line {
+      margin-top: 10px;
+      min-height: 22px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .soft-note {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid #d8e5f7;
+      background: #f6faff;
+      color: #456384;
+      font-size: 0.9rem;
+    }
+
+    .notify-panel {
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #f8fbff;
+      padding: 14px;
+    }
+
+    .notify-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .notify-title {
+      font-weight: 700;
+      font-size: 0.96rem;
+      color: #2a476e;
+    }
+
+    .notify-list {
+      list-style: none;
+      margin-top: 10px;
+      display: grid;
+      gap: 8px;
+      max-height: 250px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .notify-item {
+      border: 1px solid #d8e5f7;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 0.88rem;
+      color: #2a476e;
+    }
+
+    .notify-item.new {
+      border-color: #9ec5ff;
+      background: #eef5ff;
+    }
+
+    .notify-time {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .help-list {
+      padding-left: 18px;
+      display: grid;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    code {
+      font-family: Consolas, monospace;
+      font-size: 0.88rem;
+      background: #edf3ff;
+      padding: 2px 6px;
+      border-radius: 8px;
+    }
+
+    @media (max-width: 1024px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .actions,
+      .inline-tools {
+        width: 100%;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-dot" aria-hidden="true"></span>
+        <span>Admin IPDCEC 2026</span>
+      </div>
+      <div class="actions">
+        <a class="btn" href="index.html">Halaman Publik ID</a>
+        <a class="btn" href="index-en.html">Public Page EN</a>
+        <a class="btn btn-primary" href="register.html">Buka Form Internal</a>
+      </div>
+    </header>
+
+    <section class="hero">
+      <h1>Login Admin dan Database Pendaftar</h1>
+      <p>
+        Halaman ini dirancang untuk GitHub Pages dengan backend eksternal Supabase. Admin login memakai
+        Supabase Auth, dan data pendaftar disimpan di tabel database sehingga tidak lagi bergantung pada file lokal browser.
+        Form publik baru dapat mengirim data langsung ke Supabase, sedangkan impor CSV tetap tersedia untuk migrasi data lama dari Google Form.
+      </p>
+      <div class="notice" id="setupNotice">
+        Konfigurasi Supabase belum diisi. Buka file <code>supabase-config.js</code>, masukkan URL dan anon key project Supabase,
+        lalu refresh halaman ini.
+      </div>
+    </section>
+
+    <main class="layout">
+      <section class="stack">
+        <article class="card" id="authCard">
+          <h2>Login Admin</h2>
+          <p class="muted">Gunakan akun admin yang sudah dibuat di Supabase Authentication.</p>
+          <div class="stack" style="margin-top: 14px;">
+            <div class="field">
+              <label for="emailInput">Email Admin</label>
+              <input id="emailInput" type="email" placeholder="admin@ipdcec.online" autocomplete="username" />
+            </div>
+            <div class="field">
+              <label for="passwordInput">Password</label>
+              <input id="passwordInput" type="password" placeholder="Masukkan password" autocomplete="current-password" />
+            </div>
+            <button class="btn btn-primary" id="loginBtn" type="button">Login</button>
+            <button class="btn" id="resetPasswordBtn" type="button">Kirim Link Reset Password</button>
+          </div>
+          <div class="status-line" id="authStatus"></div>
+          <div class="soft-note">Jika perlu reset password, gunakan menu Supabase Authentication agar akses admin tetap terpusat dan terdokumentasi.</div>
+          <div class="meta">
+            <span>Model ini cocok untuk GitHub Pages karena frontend tetap statis.</span>
+            <span>Hak akses admin dikontrol lewat Supabase Auth, bukan link publik semata.</span>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Setup Singkat</h2>
+          <ol class="help-list">
+            <li>Buat project Supabase dan aktifkan email/password login.</li>
+            <li>Jalankan SQL di file <code>SUPABASE_SETUP.md</code> untuk membuat tabel <code>registrations</code>.</li>
+            <li>Edit <code>supabase-config.js</code> dan isi URL + anon key.</li>
+            <li>Buat user admin di Supabase Authentication.</li>
+            <li>Publikasikan form internal, lalu login di halaman ini untuk mereview data yang masuk.</li>
+          </ol>
+        </article>
+      </section>
+
+      <section class="card hidden" id="dashboardCard">
+        <div style="display:flex; justify-content:space-between; gap:12px; align-items:start; flex-wrap:wrap;">
+          <div>
+            <h2>Dashboard Admin</h2>
+            <p class="muted" id="sessionInfo">Memuat sesi admin...</p>
+          </div>
+          <div class="actions">
+            <button class="btn" id="refreshBtn" type="button">Refresh Data</button>
+            <button class="btn btn-danger" id="logoutBtn" type="button">Logout</button>
+          </div>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <span>Total Pendaftar</span>
+            <strong id="statTotal">0</strong>
+          </div>
+          <div class="stat">
+            <span>Negara Unik</span>
+            <strong id="statCountries">0</strong>
+          </div>
+          <div class="stat">
+            <span>Sekolah Unik</span>
+            <strong id="statSchools">0</strong>
+          </div>
+          <div class="stat">
+            <span>Data Tampil</span>
+            <strong id="statFiltered">0</strong>
+          </div>
+        </div>
+
+        <div class="inline-tools">
+          <input id="csvInput" type="file" accept=".csv,text/csv" />
+          <button class="btn btn-primary" id="importBtn" type="button">Impor CSV ke Database</button>
+          <button class="btn" id="downloadBtn" type="button">Unduh CSV Tampilan</button>
+        </div>
+
+        <div class="field search-box">
+          <label for="searchInput">Cari nama, sekolah, negara, email, judul karya</label>
+          <input id="searchInput" type="search" placeholder="Contoh: Indonesia, SMA, eco team" />
+        </div>
+
+        <div class="status-line" id="dashboardStatus"></div>
+
+        <section class="notify-panel">
+          <div class="notify-head">
+            <div class="notify-title">Notifikasi Aktivitas Peserta</div>
+            <button class="btn" id="markReadBtn" type="button">Tandai Semua Sudah Dibaca</button>
+          </div>
+          <div class="status-line" id="notificationStatus">Belum ada notifikasi baru.</div>
+          <ul class="notify-list" id="notificationList">
+            <li class="notify-item">Belum ada aktivitas peserta.</li>
+          </ul>
+        </section>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Peserta</th>
+                <th>Sekolah</th>
+                <th>Kontak</th>
+                <th>Karya</th>
+                <th>Status</th>
+                <th>Berkas</th>
+                <th>Aksi Admin</th>
+              </tr>
+            </thead>
+            <tbody id="rowsBody">
+              <tr>
+                <td colspan="7" class="muted">Belum ada data.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+    import { SUPABASE_CONFIG } from "./supabase-config.js";
+
+    const PLACEHOLDER_URL = "https://your-project-id.supabase.co";
+    const PLACEHOLDER_KEY = "your-public-anon-key";
+    const STATUS_OPTIONS = ["pending", "verified", "incomplete", "rejected"];
+    const AUTO_REFRESH_MS = 30000;
+    const LOGIN_MAX_ATTEMPTS = 5;
+    const LOGIN_LOCK_MS = 5 * 60 * 1000;
+
+    const setupNotice = document.getElementById("setupNotice");
+    const authCard = document.getElementById("authCard");
+    const dashboardCard = document.getElementById("dashboardCard");
+    const emailInput = document.getElementById("emailInput");
+    const passwordInput = document.getElementById("passwordInput");
+    const loginBtn = document.getElementById("loginBtn");
+    const resetPasswordBtn = document.getElementById("resetPasswordBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const importBtn = document.getElementById("importBtn");
+    const downloadBtn = document.getElementById("downloadBtn");
+    const csvInput = document.getElementById("csvInput");
+    const searchInput = document.getElementById("searchInput");
+    const authStatus = document.getElementById("authStatus");
+    const dashboardStatus = document.getElementById("dashboardStatus");
+    const sessionInfo = document.getElementById("sessionInfo");
+    const rowsBody = document.getElementById("rowsBody");
+    const markReadBtn = document.getElementById("markReadBtn");
+    const notificationList = document.getElementById("notificationList");
+    const notificationStatus = document.getElementById("notificationStatus");
+
+    const statTotal = document.getElementById("statTotal");
+    const statCountries = document.getElementById("statCountries");
+    const statSchools = document.getElementById("statSchools");
+    const statFiltered = document.getElementById("statFiltered");
+
+    const state = {
+      rows: [],
+      filteredRows: [],
+      client: null,
+      currentAdminEmail: "",
+      lastSeenAt: "",
+      lastNotifiedAt: "",
+      autoRefreshTimer: null,
+      failedLoginAttempts: 0,
+      loginLockedUntil: 0
+    };
+
+    function setText(el, text, isError) {
+      el.textContent = text;
+      el.style.color = isError ? "var(--danger)" : "var(--muted)";
+    }
+
+    function formatAuthErrorMessage(error) {
+      const rawMessage = String(error?.message || "").trim();
+      const status = Number(error?.status || 0);
+      if (rawMessage && rawMessage !== "{}") {
+        return rawMessage;
+      }
+
+      if (status === 400) {
+        return "Email atau password salah.";
+      }
+
+      if (status === 500) {
+        return "Akun belum aktif atau belum tersedia. Coba reset password, atau pastikan user sudah dibuat dan email sudah confirmed di Supabase.";
+      }
+
+      return "Terjadi error autentikasi. Coba lagi beberapa saat.";
+    }
+
+    function getRemainingLockMs() {
+      const remain = state.loginLockedUntil - Date.now();
+      return remain > 0 ? remain : 0;
+    }
+
+    function formatRemainingLockTime(ms) {
+      const totalSeconds = Math.ceil(ms / 1000);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      return `${minutes}m ${String(seconds).padStart(2, "0")}s`;
+    }
+
+    function updateLoginButtons() {
+      const remaining = getRemainingLockMs();
+      const isLocked = remaining > 0;
+      loginBtn.disabled = isLocked;
+      resetPasswordBtn.disabled = isLocked;
+
+      if (!isLocked && state.loginLockedUntil) {
+        state.loginLockedUntil = 0;
+        state.failedLoginAttempts = 0;
+      }
+
+      if (isLocked) {
+        setText(authStatus, `Terlalu banyak percobaan login. Coba lagi dalam ${formatRemainingLockTime(remaining)}.`, true);
+      }
+    }
+
+    function hasValidConfig() {
+      return SUPABASE_CONFIG &&
+        SUPABASE_CONFIG.url &&
+        SUPABASE_CONFIG.anonKey &&
+        SUPABASE_CONFIG.url !== PLACEHOLDER_URL &&
+        SUPABASE_CONFIG.anonKey !== PLACEHOLDER_KEY;
+    }
+
+    function getNotificationStorageKey(email) {
+      return `ipdcec:lastSeen:${String(email || "").toLowerCase()}`;
+    }
+
+    function readLastSeen(email) {
+      const key = getNotificationStorageKey(email);
+      return localStorage.getItem(key) || "";
+    }
+
+    function writeLastSeen(email, isoTime) {
+      const key = getNotificationStorageKey(email);
+      localStorage.setItem(key, String(isoTime || ""));
+    }
+
+    function formatTime(value) {
+      const date = value ? new Date(value) : null;
+      if (!date || Number.isNaN(date.getTime())) {
+        return "Waktu tidak tersedia";
+      }
+      return date.toLocaleString("id-ID", {
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    }
+
+    function isAfter(leftIso, rightIso) {
+      if (!leftIso) return false;
+      if (!rightIso) return true;
+      const left = new Date(leftIso).getTime();
+      const right = new Date(rightIso).getTime();
+      if (Number.isNaN(left) || Number.isNaN(right)) return false;
+      return left > right;
+    }
+
+    function requestBrowserNotificationPermission() {
+      if (!("Notification" in window)) return;
+      if (Notification.permission === "default") {
+        Notification.requestPermission().catch(() => {});
+      }
+    }
+
+    function maybePushBrowserNotification(newRows) {
+      if (!("Notification" in window)) return;
+      if (Notification.permission !== "granted") return;
+      if (!newRows.length) return;
+
+      const newest = newRows[0];
+      if (!isAfter(newest.submitted_at, state.lastNotifiedAt)) {
+        return;
+      }
+
+      state.lastNotifiedAt = newest.submitted_at || "";
+      const body = `${newRows.length} pendaftaran baru masuk. Terbaru: ${newest.participant_name || "Peserta"} (${newest.team_name || "Tim"}).`;
+      const notification = new Notification("IPDCEC Admin Alert", {
+        body,
+        tag: "ipdcec-new-registration"
+      });
+      notification.onclick = () => {
+        window.focus();
+      };
+    }
+
+    function renderNotifications() {
+      if (!state.rows.length) {
+        notificationList.innerHTML = '<li class="notify-item">Belum ada aktivitas peserta.</li>';
+        setText(notificationStatus, "Belum ada notifikasi baru.");
+        return;
+      }
+
+      const sorted = [...state.rows].sort((a, b) => {
+        const timeA = new Date(a.submitted_at || 0).getTime();
+        const timeB = new Date(b.submitted_at || 0).getTime();
+        return timeB - timeA;
+      });
+
+      const latest = sorted[0]?.submitted_at || "";
+      const newRows = sorted.filter((row) => isAfter(row.submitted_at, state.lastSeenAt));
+      const visibleRows = sorted.slice(0, 12);
+
+      notificationList.innerHTML = visibleRows.map((row) => {
+        const isNew = isAfter(row.submitted_at, state.lastSeenAt);
+        const label = `${row.participant_name || "Peserta"} dari ${row.school_name || "Sekolah"} mengirim karya \"${row.work_title || "Tanpa Judul"}\".`;
+        return `
+          <li class="notify-item ${isNew ? "new" : ""}">
+            ${escapeHtml(label)}
+            <div class="notify-time">${escapeHtml(formatTime(row.submitted_at))}</div>
+          </li>
+        `;
+      }).join("");
+
+      if (newRows.length) {
+        setText(notificationStatus, `${newRows.length} notifikasi baru untuk akun ini.`);
+      } else {
+        setText(notificationStatus, "Tidak ada notifikasi baru.");
+      }
+
+      maybePushBrowserNotification(newRows);
+
+      if (!state.lastSeenAt && latest) {
+        state.lastSeenAt = latest;
+        writeLastSeen(state.currentAdminEmail, latest);
+        setText(notificationStatus, "Notifikasi awal disinkronkan. Aktivitas berikutnya akan ditandai baru.");
+      }
+    }
+
+    function markAllNotificationsAsRead() {
+      const latest = state.rows?.[0]?.submitted_at;
+      if (!latest) {
+        setText(notificationStatus, "Belum ada aktivitas untuk ditandai.");
+        return;
+      }
+
+      state.lastSeenAt = latest;
+      writeLastSeen(state.currentAdminEmail, latest);
+      renderNotifications();
+      setText(notificationStatus, "Semua notifikasi ditandai sudah dibaca.");
+    }
+
+    function stopAutoRefresh() {
+      if (!state.autoRefreshTimer) return;
+      clearInterval(state.autoRefreshTimer);
+      state.autoRefreshTimer = null;
+    }
+
+    function startAutoRefresh() {
+      stopAutoRefresh();
+      state.autoRefreshTimer = setInterval(() => {
+        loadRegistrations();
+      }, AUTO_REFRESH_MS);
+    }
+
+    function escapeHtml(value) {
+      return String(value == null ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function parseCSV(text) {
+      const result = [];
+      let row = [];
+      let cell = "";
+      let inQuotes = false;
+
+      for (let i = 0; i < text.length; i += 1) {
+        const ch = text[i];
+        const next = text[i + 1];
+
+        if (ch === '"') {
+          if (inQuotes && next === '"') {
+            cell += '"';
+            i += 1;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (ch === "," && !inQuotes) {
+          row.push(cell);
+          cell = "";
+        } else if ((ch === "\n" || ch === "\r") && !inQuotes) {
+          if (ch === "\r" && next === "\n") {
+            i += 1;
+          }
+          row.push(cell);
+          cell = "";
+          if (row.length > 1 || row[0] !== "") {
+            result.push(row);
+          }
+          row = [];
+        } else {
+          cell += ch;
+        }
+      }
+
+      if (cell.length || row.length) {
+        row.push(cell);
+        result.push(row);
+      }
+
+      return result;
+    }
+
+    function matrixToObjects(matrix) {
+      if (!matrix.length) return [];
+
+      const headers = matrix[0].map((value, index) => String(value || "").trim() || `Column ${index + 1}`);
+      return matrix.slice(1)
+        .map((line) => {
+          const obj = {};
+          headers.forEach((header, index) => {
+            obj[header] = String(line[index] || "").trim();
+          });
+          return obj;
+        })
+        .filter((obj) => Object.values(obj).some(Boolean));
+    }
+
+    function pickField(row, keywords) {
+      const keys = Object.keys(row);
+      for (const key of keys) {
+        const normalized = key.toLowerCase();
+        for (const keyword of keywords) {
+          if (normalized.includes(keyword)) {
+            return row[key] || "";
+          }
+        }
+      }
+      return "";
+    }
+
+    function buildEntryKey(normalized) {
+      return [normalized.email, normalized.team_name, normalized.work_title, normalized.submitted_at]
+        .filter(Boolean)
+        .join("|")
+        .toLowerCase()
+        .replace(/\s+/g, "-");
+    }
+
+    function normalizeRegistrationRow(row) {
+      const normalized = {
+        submitted_at: pickField(row, ["timestamp", "waktu"]) || new Date().toISOString(),
+        team_name: pickField(row, ["nama tim", "team name", "team"]),
+        participant_name: pickField(row, ["nama peserta", "participant", "nama lengkap", "full name"]),
+        school_name: pickField(row, ["school", "sekolah", "asal sekolah"]),
+        country: pickField(row, ["country", "negara"]),
+        email: pickField(row, ["email"]),
+        phone: pickField(row, ["phone", "whatsapp", "nomor", "no hp"]),
+        instagram: pickField(row, ["instagram", "ig"]),
+        work_title: pickField(row, ["judul karya", "title", "judul"]),
+        verification_status: "pending",
+        admin_notes: "",
+        raw_data: row
+      };
+
+      normalized.entry_key = buildEntryKey(normalized) || `entry-${crypto.randomUUID()}`;
+      return normalized;
+    }
+
+    function renderStats(rows) {
+      const countries = new Set();
+      const schools = new Set();
+
+      state.rows.forEach((row) => {
+        if (row.country) countries.add(String(row.country).toLowerCase());
+        if (row.school_name) schools.add(String(row.school_name).toLowerCase());
+      });
+
+      statTotal.textContent = String(state.rows.length);
+      statCountries.textContent = String(countries.size);
+      statSchools.textContent = String(schools.size);
+      statFiltered.textContent = String(rows.length);
+    }
+
+    function getStatusPill(status) {
+      const safe = STATUS_OPTIONS.includes(status) ? status : "pending";
+      return `<span class="pill ${safe}">${escapeHtml(safe)}</span>`;
+    }
+
+    function renderDocumentLinks(rawData) {
+      const data = rawData && typeof rawData === "object" ? rawData : {};
+      const entries = [
+        ["Post Instagram", data.instagram_post_url],
+        ["Video", data.video_url],
+        ["Kartu Pelajar", data.student_proof_url],
+        ["Twibbon", data.twibbon_proof_url],
+        ["Poster", data.poster_proof_url],
+        ["Bukti Bayar", data.payment_proof_url]
+      ].filter((entry) => entry[1]);
+
+      if (!entries.length) {
+        return '<span class="small muted">Tidak ada link berkas.</span>';
+      }
+
+      return entries.map(([label, url]) => {
+        const safeLabel = escapeHtml(label);
+        const safeUrl = escapeHtml(url);
+        return `<div class="small"><a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${safeLabel}</a></div>`;
+      }).join("");
+    }
+
+    function renderRows() {
+      const query = searchInput.value.trim().toLowerCase();
+      state.filteredRows = state.rows.filter((row) => {
+        if (!query) return true;
+        return [
+          row.team_name,
+          row.participant_name,
+          row.school_name,
+          row.country,
+          row.email,
+          row.work_title,
+          row.instagram
+        ].join(" ").toLowerCase().includes(query);
+      });
+
+      renderStats(state.filteredRows);
+
+      if (!state.filteredRows.length) {
+        rowsBody.innerHTML = `<tr><td colspan="7" class="muted">${query ? "Tidak ada data yang cocok." : "Belum ada pendaftaran masuk."}</td></tr>`;
+        return;
+      }
+
+      rowsBody.innerHTML = state.filteredRows.map((row) => {
+        const safeId = escapeHtml(row.id);
+        const safeNotes = escapeHtml(row.admin_notes || "");
+        const safeParticipant = escapeHtml(row.participant_name || "-");
+        const safeTeam = escapeHtml(row.team_name || "-");
+        const safeSchool = escapeHtml(row.school_name || "-");
+        const safeCountry = escapeHtml(row.country || "-");
+        const safeEmail = escapeHtml(row.email || "-");
+        const safePhone = escapeHtml(row.phone || "-");
+        const safeInstagram = escapeHtml(row.instagram || "-");
+        const safeTitle = escapeHtml(row.work_title || "-");
+        const safeDate = escapeHtml(row.submitted_at || "-");
+
+        return `
+          <tr>
+            <td>
+              <strong>${safeParticipant}</strong><br />
+              <span class="small muted">Tim: ${safeTeam}</span><br />
+              <span class="small muted">Submit: ${safeDate}</span>
+            </td>
+            <td>
+              ${safeSchool}<br />
+              <span class="small muted">${safeCountry}</span>
+            </td>
+            <td>
+              <div>${safeEmail}</div>
+              <div class="small muted">${safePhone}</div>
+              <div class="small muted">${safeInstagram}</div>
+            </td>
+            <td>
+              <strong>${safeTitle}</strong><br />
+              <span class="small muted">Key: ${escapeHtml(row.entry_key || "-")}</span>
+            </td>
+            <td>${getStatusPill(row.verification_status)}</td>
+            <td>${renderDocumentLinks(row.raw_data)}</td>
+            <td>
+              <div class="row-actions">
+                <select data-role="status" data-id="${safeId}">
+                  ${STATUS_OPTIONS.map((option) => `<option value="${option}" ${row.verification_status === option ? "selected" : ""}>${option}</option>`).join("")}
+                </select>
+                <textarea data-role="notes" data-id="${safeId}" placeholder="Catatan admin">${safeNotes}</textarea>
+                <button class="btn btn-primary small" type="button" data-role="save" data-id="${safeId}">Simpan</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    async function loadRegistrations() {
+      setText(dashboardStatus, "Memuat data pendaftar...");
+      const { data, error } = await state.client
+        .from("registrations")
+        .select("id, entry_key, submitted_at, team_name, participant_name, school_name, country, email, phone, instagram, work_title, verification_status, admin_notes, raw_data")
+        .order("submitted_at", { ascending: false });
+
+      if (error) {
+        setText(dashboardStatus, `Gagal memuat data: ${error.message}`, true);
+        return;
+      }
+
+      state.rows = data || [];
+      renderRows();
+      renderNotifications();
+      setText(dashboardStatus, `Data termuat: ${state.rows.length} pendaftar.`);
+    }
+
+    async function saveRow(id) {
+      const statusEl = document.querySelector(`[data-role="status"][data-id="${CSS.escape(id)}"]`);
+      const notesEl = document.querySelector(`[data-role="notes"][data-id="${CSS.escape(id)}"]`);
+      if (!statusEl || !notesEl) return;
+
+      const payload = {
+        verification_status: statusEl.value,
+        admin_notes: notesEl.value.trim(),
+        updated_at: new Date().toISOString()
+      };
+
+      setText(dashboardStatus, "Menyimpan perubahan admin...");
+      const { error } = await state.client
+        .from("registrations")
+        .update(payload)
+        .eq("id", id);
+
+      if (error) {
+        setText(dashboardStatus, `Gagal menyimpan: ${error.message}`, true);
+        return;
+      }
+
+      const localRow = state.rows.find((row) => row.id === id);
+      if (localRow) {
+        localRow.verification_status = payload.verification_status;
+        localRow.admin_notes = payload.admin_notes;
+      }
+      renderRows();
+      setText(dashboardStatus, "Perubahan admin berhasil disimpan.");
+    }
+
+    function exportFilteredCSV() {
+      if (!state.filteredRows.length) {
+        setText(dashboardStatus, "Tidak ada data untuk diunduh.", true);
+        return;
+      }
+
+      const headers = [
+        "submitted_at",
+        "participant_name",
+        "team_name",
+        "school_name",
+        "country",
+        "email",
+        "phone",
+        "instagram",
+        "work_title",
+        "verification_status",
+        "admin_notes",
+        "entry_key"
+      ];
+
+      const escapeCsv = (value) => {
+        const text = String(value == null ? "" : value);
+        if (text.includes('"') || text.includes(",") || text.includes("\n")) {
+          return `"${text.replace(/"/g, '""')}"`;
+        }
+        return text;
+      };
+
+      const lines = [headers.join(",")];
+      state.filteredRows.forEach((row) => {
+        lines.push(headers.map((header) => escapeCsv(row[header] || "")).join(","));
+      });
+
+      const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "ipdcec-registrations.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    async function importCSVToDatabase() {
+      const file = csvInput.files && csvInput.files[0];
+      if (!file) {
+        setText(dashboardStatus, "Pilih file CSV dulu sebelum impor.", true);
+        return;
+      }
+
+      setText(dashboardStatus, `Membaca file ${file.name}...`);
+      const text = await file.text();
+      const objects = matrixToObjects(parseCSV(text));
+      const payload = objects.map(normalizeRegistrationRow);
+
+      if (!payload.length) {
+        setText(dashboardStatus, "CSV kosong atau format tidak terbaca.", true);
+        return;
+      }
+
+      setText(dashboardStatus, `Mengimpor ${payload.length} data ke Supabase...`);
+      const { error } = await state.client
+        .from("registrations")
+        .upsert(payload, { onConflict: "entry_key" });
+
+      if (error) {
+        setText(dashboardStatus, `Impor gagal: ${error.message}`, true);
+        return;
+      }
+
+      setText(dashboardStatus, `Impor berhasil: ${payload.length} data diproses.`);
+      await loadRegistrations();
+    }
+
+    async function ensureAdmin(email) {
+      const { data, error } = await state.client
+        .from("admin_users")
+        .select("email")
+        .eq("email", email)
+        .maybeSingle();
+
+      if (error) {
+        setText(authStatus, `Gagal memeriksa hak akses admin: ${error.message}`, true);
+        return false;
+      }
+
+      if (!data) {
+        await state.client.auth.signOut();
+        setText(authStatus, "Akun ini berhasil login, tetapi belum terdaftar sebagai admin.", true);
+        return false;
+      }
+
+      return true;
+    }
+
+    function showLoggedOutState() {
+      stopAutoRefresh();
+      state.currentAdminEmail = "";
+      state.lastSeenAt = "";
+      state.lastNotifiedAt = "";
+      authCard.classList.remove("hidden");
+      dashboardCard.classList.add("hidden");
+      sessionInfo.textContent = "Belum login.";
+    }
+
+    function showLoggedInState(email) {
+      state.currentAdminEmail = String(email || "").toLowerCase();
+      state.lastSeenAt = readLastSeen(state.currentAdminEmail);
+      authCard.classList.add("hidden");
+      dashboardCard.classList.remove("hidden");
+      sessionInfo.textContent = `Login sebagai ${email}`;
+      requestBrowserNotificationPermission();
+      startAutoRefresh();
+    }
+
+    async function login() {
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+      const remaining = getRemainingLockMs();
+
+      if (remaining > 0) {
+        updateLoginButtons();
+        return;
+      }
+
+      if (!email || !password) {
+        setText(authStatus, "Email dan password wajib diisi.", true);
+        return;
+      }
+
+      setText(authStatus, "Mencoba login...");
+      const { error } = await state.client.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        state.failedLoginAttempts += 1;
+        if (state.failedLoginAttempts >= LOGIN_MAX_ATTEMPTS) {
+          state.loginLockedUntil = Date.now() + LOGIN_LOCK_MS;
+          updateLoginButtons();
+          return;
+        }
+        const remainAttempt = LOGIN_MAX_ATTEMPTS - state.failedLoginAttempts;
+        setText(authStatus, `Login gagal: ${formatAuthErrorMessage(error)}. Sisa percobaan: ${remainAttempt}.`, true);
+        return;
+      }
+
+      state.failedLoginAttempts = 0;
+      state.loginLockedUntil = 0;
+      updateLoginButtons();
+      passwordInput.value = "";
+      setText(authStatus, "Login berhasil.");
+    }
+
+    async function sendPasswordReset() {
+      const email = emailInput.value.trim();
+      if (!email) {
+        setText(authStatus, "Isi email admin dulu sebelum kirim reset password.", true);
+        return;
+      }
+
+      setText(authStatus, "Mengirim link reset password...");
+      const { error } = await state.client.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.href
+      });
+
+      if (error) {
+        setText(authStatus, `Gagal kirim reset password: ${formatAuthErrorMessage(error)}`, true);
+        return;
+      }
+
+      setText(authStatus, "Link reset password terkirim. Cek inbox/spam email admin.");
+    }
+
+    async function logout() {
+      const { error } = await state.client.auth.signOut();
+      if (error) {
+        setText(dashboardStatus, `Logout gagal: ${error.message}`, true);
+        return;
+      }
+      showLoggedOutState();
+      setText(authStatus, "Berhasil logout.");
+    }
+
+    async function bootstrap() {
+      if (!hasValidConfig()) {
+        loginBtn.disabled = true;
+        return;
+      }
+
+      setupNotice.classList.add("hidden");
+      state.client = createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+
+      state.client.auth.onAuthStateChange(async (_event, session) => {
+        if (session?.user?.email) {
+          const allowed = await ensureAdmin(session.user.email);
+          if (!allowed) {
+            showLoggedOutState();
+            return;
+          }
+          showLoggedInState(session.user.email);
+          await loadRegistrations();
+        } else {
+          showLoggedOutState();
+        }
+      });
+
+      const { data } = await state.client.auth.getSession();
+      if (data.session?.user?.email) {
+        const allowed = await ensureAdmin(data.session.user.email);
+        if (!allowed) {
+          showLoggedOutState();
+          return;
+        }
+        showLoggedInState(data.session.user.email);
+        await loadRegistrations();
+      } else {
+        showLoggedOutState();
+      }
+
+      updateLoginButtons();
+      window.setInterval(updateLoginButtons, 1000);
+    }
+
+    loginBtn.addEventListener("click", login);
+    resetPasswordBtn.addEventListener("click", sendPasswordReset);
+    logoutBtn.addEventListener("click", logout);
+    refreshBtn.addEventListener("click", loadRegistrations);
+    importBtn.addEventListener("click", importCSVToDatabase);
+    downloadBtn.addEventListener("click", exportFilteredCSV);
+    searchInput.addEventListener("input", renderRows);
+
+    rowsBody.addEventListener("click", (event) => {
+      const button = event.target.closest('[data-role="save"]');
+      if (!button) return;
+      saveRow(button.dataset.id);
+    });
+
+    markReadBtn.addEventListener("click", markAllNotificationsAsRead);
+
+    bootstrap();
+  </script>
+</body>
+</html>
